@@ -33,8 +33,22 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         struct_desc["path"] = path
 
         glstruct = self.glv_add_struct(struct)
-        return struct
 
+        print "iter"
+        root = glstruct.glo_iter_children()
+        objects = []
+        for r in root:
+				objects.append(r)
+		
+        print "color trace"
+        print objects[2].glal_calc_color_trace()
+        print objects[3].glal_calc_color_trace()
+        
+#        iters = objects[2].glal_iter_atoms()
+#        for i in iters:
+#            print i
+		  
+        return struct
 
     def initializeGL(self):
         self.glv_init()
@@ -72,7 +86,7 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def glv_redraw(self):
         self.updateGL()
         # why need to use updateGL, but glv_render() not works.
-
+		# Answer: update Tells QT to refresh the widget
     def update_select(self, fragment_id_list=[]):
         self.update_fragment_id_list(fragment_id_list)
         self.glv_redraw()
@@ -273,24 +287,36 @@ class MainWindow(QtGui.QMainWindow):
         fileMenu = menuBar.addMenu('&File')
         fileMenu.addAction(self.exitAction)
 
-    def initTIMs(self):
-         # read dTIM
-        f = open("data/dTIM.fa")
-        l = f.readline()
-        f.close()
-        dTIM =[]
-        for c in l:
-            dTIM.append(c)
 
-        f = open("data/scTIM.fa")
-        l = f.readline()
+	# Create the lists in the right panel
+    def initTIMs(self):
+         
+		# read dTIM
+        f = open("data/dTIM.fa")
+        line = f.readline()
         f.close()
+		
+		# add each element to a list
+        dTIM =[]
+        for c in line:
+            dTIM.append(c)
+		
+		# read scTIM
+        f = open("data/scTIM.fa")
+        line = f.readline()
+       	f.close()
+        
+        # add each element to a list
         scTIM =[]
-        for c in l:
-            scTIM.append(c)
+        for c in line:
+             scTIM.append(c)
+
+		# create one list of both TIMs
         frag_id = range(2,300)
         items = zip(frag_id,dTIM,scTIM)
         self.__different_frag_id=set()
+		
+		# iterate and find the similarities, then color them accordingly
         for item in items:
             item_d = ListWidgetItem(item[1], self.dTIMList, item[0])
             item_sc = ListWidgetItem(item[2], self.scTIMList, item[0])
@@ -298,15 +324,20 @@ class MainWindow(QtGui.QMainWindow):
                 self.__different_frag_id.add(item[0])
                 item_d.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
-
+		
+		# read the alignment file
         f = open("data/cTIM_align_small.fa")
         lines = f.readlines()
         f.close()
+		
+		# determine the orientation and store in a list
         self.TIMs_raw=[]
         for l in lines:
             if l[0] == ">" or l[0] == '\n':
                 continue
             self.TIMs_raw.append(l)
+        
+        # bottom widget
         for seq_id in range(len(self.TIMs_raw)):
             seq=[]
             for c in self.TIMs_raw[seq_id]:
