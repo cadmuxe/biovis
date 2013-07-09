@@ -38,10 +38,10 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         root = glstruct.glo_iter_children()
         objects = []
         for r in root:
-				objects.append(r)
+			objects.append(r)
 		
         print "color trace"
-        print objects[2].glal_calc_color_trace()
+        print objects[2].glal_calc_color_trace()    
         print objects[3].glal_calc_color_trace()
         
 #        iters = objects[2].glal_iter_atoms()
@@ -104,9 +104,6 @@ class ListWidgetItem(QtGui.QListWidgetItem):
         self.__callback = {}
     def get_fragment_id(self):
         return self.frag_id
-
-
-
 
 
 class MyPaintWidget(QtGui.QWidget):
@@ -211,16 +208,18 @@ class MyPaintWidget(QtGui.QWidget):
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
-
+        QtGui.QMainWindow.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+            
         self.setWindowTitle("2013 BioVis Contest")
         self.resize(800, 600)
 
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
 
-        self.glWidget = GLWidget(self.centralWidget)
-
+        #self.glWidget = GLWidget(self.centralWidget)
+        self.glWidgetSC = GLWidget(self.centralWidget)
+        self.glWidgetD = GLWidget(self.centralWidget)
+        
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
@@ -228,19 +227,21 @@ class MainWindow(QtGui.QMainWindow):
         self.dTIMLabel = QtGui.QLabel("dTIM")
         self.scTIMlabel = QtGui.QLabel("scTIM")
 
-        self.gridlayout.addWidget(self.glWidget, 0, 0, 2, 1)
+        self.gridlayout.addWidget(self.glWidgetSC, 0, 0, 2, 1)
+        self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
 
-        self.gridlayout.addWidget(self.dTIMLabel, 0, 1, 1, 1)
-        self.gridlayout.addWidget(self.dTIMList, 1, 1, 1, 1)
+        self.gridlayout.addWidget(self.dTIMLabel, 0, 2, 1, 1)
+        self.gridlayout.addWidget(self.dTIMList, 1, 2, 1, 1)
 
-        self.gridlayout.addWidget(self.scTIMlabel, 0, 2, 1, 1)
-        self.gridlayout.addWidget(self.scTIMList, 1, 2, 1, 1)
+        self.gridlayout.addWidget(self.scTIMlabel, 0, 3, 1, 1)
+        self.gridlayout.addWidget(self.scTIMList, 1, 3, 1, 1)
 
-        self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 3)
+        self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 4)
 
         self.gridlayout.setColumnStretch(0,20)
-        self.gridlayout.setColumnStretch(1,1)
+        self.gridlayout.setColumnStretch(1,20)
         self.gridlayout.setColumnStretch(2,1)
+        self.gridlayout.setColumnStretch(3,1)
 
         self.gridlayout.setRowStretch(0,0)
         self.gridlayout.setRowStretch(1,2)
@@ -268,14 +269,11 @@ class MainWindow(QtGui.QMainWindow):
         self.dTIMList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.dTIMList.verticalScrollBar().valueChanged.connect(self.scTIMList.verticalScrollBar().setValue)
 
-
-
-
     def update_scTIM_select(self):
         id_list =[]
         for item in self.scTIMList.selectedItems():
             id_list.append(item.get_fragment_id())
-        self.glWidget.update_select(id_list)
+        self.glWidgetSC.update_select(id_list)
         for item in self.dTIMList.selectedItems():
             self.dTIMList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
         for i in id_list:
@@ -355,6 +353,7 @@ class MainWindow(QtGui.QMainWindow):
 app = QtGui.QApplication(sys.argv)
 
 win = MainWindow()
+
 win.show()
 
 sys.exit(app.exec_())
