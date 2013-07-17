@@ -30,6 +30,7 @@ class MyPaintWidget(QtGui.QWidget):
 
         # current scroll postion 0-1.0
         self.__scroll_button_position = 0.0
+        self.cursor_button = QtCore.Qt.MouseButton.NoButton
 
     def __update_size_info(self):
         """
@@ -78,8 +79,12 @@ class MyPaintWidget(QtGui.QWidget):
             self.__update_size_info()
 
         painter = QtGui.QPainter(self)
-        #painter.begin(self)
-        painter.drawPixmap(0,0, self.__TIMs_cache)
+
+        # draw TIMs
+        painter.drawPixmap(0,0,
+                           self.__TIMs_cache,
+                           0,(self.__TIMs_cache_height-self.__wiget_height)*self.__scroll_button_position,
+                           self.__wiget_width, self.__wiget_height)
 
         # draw scroll bar
         painter.setOpacity(0.5)
@@ -91,32 +96,73 @@ class MyPaintWidget(QtGui.QWidget):
                            self.__TIMs_cache_scrollbar,
                            0, (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position,
                            self.__scrollbar_width, self.__scroll_button_height)
-        print((self.__scrollbar_postion_x, (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position,
-                           0, (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position,
-                           self.__scrollbar_width,self.__scroll_button_height))
 
+        # draw outline of scroll button
+        pen = QtGui.QPen()
+        pen.setWidth(2)
+        pen.setColor(QtCore.Qt.green)
+        painter.setPen(pen)
+        painter.setBrush(QtCore.Qt.NoBrush)
+        painter.drawRect(self.__scrollbar_postion_x,(self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position,
+                         self.__scrollbar_width,self.__scroll_button_height)
 
+        # draw a rectangle on current mouse position
         if self.on_sequences_id != None:
             painter.setPen(QtCore.Qt.NoPen)
+            selection = QtGui.QPixmap(self.__wiget_width, 10)
+            selection.fill(QtCore.Qt.white)
+            painter_s = QtGui.QPainter(selection)
+            painter_s.setPen(QtCore.Qt.NoPen)
             for y in range(0, len(self.sequences[self.on_sequences_id])):
-                painter.setBrush(self.sequences[self.on_sequences_id][y])
-                painter.drawRect(y * self.paint_freg_width, self.on_sequences_id * self.paint_freg_heigh,
+                painter_s.setBrush(self.sequences[self.on_sequences_id][y])
+                painter_s.drawRect(y * self.paint_freg_width, 0,
                                  self.paint_freg_width, 10)
-            painter.setPen(QtCore.Qt.white)
-            painter.setBrush(QtCore.Qt.NoBrush)
-            painter.drawRect(0,self.on_sequences_id * self.paint_freg_heigh,self.paint_freg_width*len(self.sequences[self.on_sequences_id]),10)
+            painter_s.setPen(QtCore.Qt.white)
+            painter_s.setBrush(QtCore.Qt.NoBrush)
+            painter_s.drawRect(0,0,self.__TIMs_cache_width, 9)
+            painter_s.end()
+            new_selection = selection.scaled(self.__TIMs_cache_width,10)
+            painter.drawPixmap(0,self.on_sequences_id * self.paint_freg_heigh-(self.__TIMs_cache_height-self.__wiget_height)*self.__scroll_button_position, new_selection)
         painter.end()
+
+    def mousePressEvent(self,event):
+        self.cursor_pre_x = event.x()
+        self.cursor_pre_y = event.y()
+        self.cursor_button = event.button()
+
+    def mouseReleaseEvent(self,event):
+        if self.cursor_button == event.button():
+            self.cursor_button = QtCore.Qt.MouseButton.NoButton
+
+    def update_scroll(self,dy):
+        self.__scroll_button_position +=dy
+        if self.__scroll_button_position<0:
+            self.__scroll_button_position = 0.0
+        elif self.__scroll_button_position > 1.0:
+            self.__scroll_button_position = 1.0
 
     def mouseMoveEvent(self,event):
         x,y = event.x(),event.y()
-        self.on_sequences_id = y / self.paint_freg_heigh
-        self.on_freg_id = x / self.paint_freg_width
-        if self.on_sequences_id >= self.sequences["len"]:
-            self.on_sequences_id = self.sequences["len"] - 1
-        if self.on_freg_id >= len(self.sequences[self.on_sequences_id]):
-            self.on_freg_id = len(self.sequences[self.on_sequences_id]) -1
 
-        print self.on_sequences_id,self.on_freg_id
+        # draw selection rectangle
+        if x < self.__scrollbar_postion_x:
+            self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__wiget_height)*self.__scroll_button_position) / self.paint_freg_heigh
+            self.on_freg_id = x / self.paint_freg_width
+            if self.on_sequences_id >= self.sequences["len"]:
+                self.on_sequences_id = self.sequences["len"] - 1
+            if self.on_freg_id >= len(self.sequences[self.on_sequences_id]):
+                self.on_freg_id = len(self.sequences[self.on_sequences_id]) -1
+            print (self.on_sequences_id,self.on_freg_id)
+
+        elif self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
+            if (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position < y \
+                        < ((self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position + self.__scroll_button_height):
+                d =  (y - self.cursor_pre_y) /100.0
+                print d
+                self.update_scroll(d)
+                self.cursor_pre_x = x
+                self.cursor_pre_y = y
+
         self.update()
 
 
