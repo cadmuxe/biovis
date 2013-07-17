@@ -6,14 +6,6 @@ from numpy import array
 from mmLib import FileIO, Viewer, OpenGLDriver
 from SPaintWidget import *
 
-class color(object):
-    gray = QtCore.Qt.gray
-    black = QtCore.Qt.black
-    red = QtCore.Qt.red
-    gree = QtCore.Qt.green
-    def __getattribute__(self, item):
-        return self.item
-
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
         self.parent = parent
@@ -231,7 +223,7 @@ class MainWindow(QtGui.QMainWindow):
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
 		
 		# read the alignment file
-        f = open("data/cTIM_align_small.fa")
+        f = open("data/cTIM_core_align.fa")
         lines = f.readlines()
         f.close()
 		

@@ -1,4 +1,3 @@
-__author__ = 'cadmuxe'
 from PySide import QtCore, QtGui, QtOpenGL
 
 class color(object):
@@ -38,23 +37,24 @@ class MyPaintWidget(QtGui.QWidget):
         """
         # Original TIMs QPixmap size
 
-        self.__wiget_height = self.size().height()
-        self.__wiget_width = self.size().width()
+        self.__widget_height = self.size().height()
+        self.__widget_width = self.size().width()
 
         self.__scrollbar_width = 40
-        self.__scrollbar_height = self.__wiget_height
-        self.__scrollbar_postion_x = self.__wiget_width -  self.__scrollbar_width
+        self.__scrollbar_height = self.__widget_height
+        self.__scrollbar_postion_x = self.__widget_width -  self.__scrollbar_width
         self.__scrollbar_postion_y = 0 # not really used
 
-
+        # used for scaling, let the TIMs image become a little small, so that have enough space for scrollbar
         self.__TIMs_cache_height = self.__TIMs_cache.size().height()
         self.__TIMs_cache_width = self.__TIMs_cache.size().width() - self.__scrollbar_width
 
+        # scrollbar is a thumbnail of TIMs image.
         self.__TIMs_cache_scrollbar = self.__TIMs_cache.scaled(self.__scrollbar_width,self.__scrollbar_height)
         self.__TIMs_cache = self.__TIMs_cache.scaled(self.__TIMs_cache_width,self.__TIMs_cache_height)
 
-
-        self.__scroll_button_height = self.__wiget_height * self.__wiget_height/self.__TIMs_cache_height
+        # the height of scroll button is depend on the height of widget and the length of TIMs image
+        self.__scroll_button_height = self.__widget_height * self.__widget_height/self.__TIMs_cache_height
 
 
 
@@ -62,7 +62,7 @@ class MyPaintWidget(QtGui.QWidget):
         self.paint_freg_heigh = 2
         self.paint_freg_width = event.rect().width() / self.sequences["max_len_freg"]   # assume all the sequences have the same length
 
-        # cache the result
+        # cache the result (TIMs image)
         if self.__TIMs_redraw:
             self.__TIMs_cache = QtGui.QPixmap(event.rect().width(), self.sequences["len"]*self.paint_freg_heigh)
             self.__TIMs_cache.fill(QtCore.Qt.white)
@@ -79,12 +79,11 @@ class MyPaintWidget(QtGui.QWidget):
             self.__update_size_info()
 
         painter = QtGui.QPainter(self)
-
         # draw TIMs
         painter.drawPixmap(0,0,
                            self.__TIMs_cache,
-                           0,(self.__TIMs_cache_height-self.__wiget_height)*self.__scroll_button_position,
-                           self.__wiget_width, self.__wiget_height)
+                           0,(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position,
+                           self.__widget_width, self.__widget_height)
 
         # draw scroll bar
         painter.setOpacity(0.5)
@@ -92,6 +91,8 @@ class MyPaintWidget(QtGui.QWidget):
         painter.setOpacity(1)
 
         # draw scroll button
+        # the parameters of drawPixmap are (position_x, position_y, pixmap, offest_x, offset_y, width, height).
+        # offest: the start point of pixmap, from the top left
         painter.drawPixmap(self.__scrollbar_postion_x, (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position,
                            self.__TIMs_cache_scrollbar,
                            0, (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position,
@@ -109,7 +110,7 @@ class MyPaintWidget(QtGui.QWidget):
         # draw a rectangle on current mouse position
         if self.on_sequences_id != None:
             painter.setPen(QtCore.Qt.NoPen)
-            selection = QtGui.QPixmap(self.__wiget_width, 10)
+            selection = QtGui.QPixmap(self.__widget_width, 10)
             selection.fill(QtCore.Qt.white)
             painter_s = QtGui.QPainter(selection)
             painter_s.setPen(QtCore.Qt.NoPen)
@@ -122,7 +123,7 @@ class MyPaintWidget(QtGui.QWidget):
             painter_s.drawRect(0,0,self.__TIMs_cache_width, 9)
             painter_s.end()
             new_selection = selection.scaled(self.__TIMs_cache_width,10)
-            painter.drawPixmap(0,self.on_sequences_id * self.paint_freg_heigh-(self.__TIMs_cache_height-self.__wiget_height)*self.__scroll_button_position, new_selection)
+            painter.drawPixmap(0,self.on_sequences_id * self.paint_freg_heigh-(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position, new_selection)
         painter.end()
 
     def mousePressEvent(self,event):
@@ -146,7 +147,7 @@ class MyPaintWidget(QtGui.QWidget):
 
         # draw selection rectangle
         if x < self.__scrollbar_postion_x:
-            self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__wiget_height)*self.__scroll_button_position) / self.paint_freg_heigh
+            self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position) / self.paint_freg_heigh
             self.on_freg_id = x / self.paint_freg_width
             if self.on_sequences_id >= self.sequences["len"]:
                 self.on_sequences_id = self.sequences["len"] - 1
@@ -157,7 +158,7 @@ class MyPaintWidget(QtGui.QWidget):
         elif self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
             if (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position < y \
                         < ((self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position + self.__scroll_button_height):
-                d =  (y - self.cursor_pre_y) /100.0
+                d =  (y - self.cursor_pre_y) /200.0
                 print d
                 self.update_scroll(d)
                 self.cursor_pre_x = x
