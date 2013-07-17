@@ -9,6 +9,7 @@ from OpenGL.GLU           import *
 from OpenGL.GLUT          import *
 
 from mmLib import Constants, FileIO, Viewer, R3DDriver, OpenGLDriver, Structure, TLS
+from SPaintWidget import *
 
 from GLPropertyBrowser import *
 	    		
@@ -108,101 +109,6 @@ class ListWidgetItem(QtGui.QListWidgetItem):
     def get_fragment_id(self):
         return self.frag_id
 
-class MyPaintWidget(QtGui.QWidget):
-    def __init__(self,parent=None):
-        QtGui.QWidget.__init__(self,parent)
-        self.setBackgroundRole(QtGui.QPalette.Base)
-
-        # {id:[color], 1:[1,1,1,0,2,2,2]}  color: each number refer to one kind of color
-        self.sequences={"len":0, "max_len_freg":0}
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.setMouseTracking(True)
-
-        # whether to redraw the cache
-        self.__TIMs_redraw = True
-        # mouse on which sequence and fregment
-        self.on_sequences_id = None
-        self.on_freg_id = None
-
-        self.__callback={} # callback function,  mouse_click, mouse_over
-
-    def color(self, color_id):
-        if color_id == 0:
-            return QtCore.Qt.gray
-        elif color_id == 1:
-            return QtCore.Qt.black
-        elif color_id == 2:
-            return QtCore.Qt.red
-        elif color_id == 3:
-            return QtCore.Qt.green
-        else:
-            pass
-
-    def paintEvent(self, event):
-        self.paint_freg_heigh = event.rect().height() / self.sequences["len"]
-        self.paint_freg_width = event.rect().width() / self.sequences["max_len_freg"]   # assume all the sequences have the same length
-
-        # cache the result
-        if self.__TIMs_redraw:
-            self.__TIMs_cache = QtGui.QPixmap(event.rect().width(), event.rect().height())
-            self.__TIMs_cache.fill(QtCore.Qt.white)
-            painter = QtGui.QPainter(self.__TIMs_cache)
-            #painter.begin(self.__TIMs_cache)
-            painter.setPen(QtCore.Qt.NoPen)
-            for x in range(0,self.sequences["len"]):
-                for y in range(0, len(self.sequences[x])):
-                    painter.setBrush(self.color(self.sequences[x][y]))
-                    painter.drawRect(y * self.paint_freg_width, x*self.paint_freg_heigh,
-                                     self.paint_freg_width, self.paint_freg_heigh)
-            painter.end()
-            self.__TIMs_redraw = False
-
-        painter = QtGui.QPainter(self)
-        #painter.begin(self)
-        painter.drawPixmap(0,0, self.__TIMs_cache)
-        if self.on_sequences_id != None:
-            painter.setPen(QtCore.Qt.NoPen)
-            for y in range(0, len(self.sequences[self.on_sequences_id])):
-                painter.setBrush(self.color(self.sequences[self.on_sequences_id][y]))
-                painter.drawRect(y * self.paint_freg_width, self.on_sequences_id * self.paint_freg_heigh,
-                                 self.paint_freg_width, 10)
-            painter.setPen(QtCore.Qt.white)
-            painter.setBrush(QtCore.Qt.NoBrush)
-            painter.drawRect(0,self.on_sequences_id * self.paint_freg_heigh,self.paint_freg_width*len(self.sequences[self.on_sequences_id]),10)
-        painter.end()
-
-    def mouseMoveEvent(self,event):
-        x,y = event.x(),event.y()
-        self.on_sequences_id = y / self.paint_freg_heigh
-        self.on_freg_id = x / self.paint_freg_width
-        if self.on_sequences_id >= self.sequences["len"]:
-            self.on_sequences_id = self.sequences["len"] - 1
-        if self.on_freg_id >= len(self.sequences[self.on_sequences_id]):
-            self.on_freg_id = len(self.sequences[self.on_sequences_id]) -1
-
-        print self.on_sequences_id,self.on_freg_id
-        self.update()
-
-    def update_color(self,sequence_id, new_color_list):
-        self.sequences[sequence_id] = new_color_list
-        self.sequences["len"] = len(self.sequences) - 2
-        if self.sequences["max_len_freg"] < len(self.sequences[sequence_id]):
-            self.sequences["max_len_freg"] = len(self.sequences[sequence_id])
-    def update_freg_color(self, sequence_id, freg_id, color):
-        if not self.sequences.has_key(sequence_id):
-            self.sequences[sequence_id] = []
-        try:
-            self.sequences[sequence_id][freg_id] = color
-        except IndexError:
-            self.sequences[sequence_id].append(color)
-        self.sequences["len"] = len(self.sequences) - 2
-        if self.sequences["max_len_freg"] < len(self.sequences[sequence_id]):
-            self.sequences["max_len_freg"] = len(self.sequences[sequence_id])
-
-    def registerClickCallBack(self, d):
-        self.__callback[d["name"]] = d["func"]
-    def resizeEvent(self, *args, **kwargs):
-        self.__TIMs_redraw = True
 
 class MainWindow(QtGui.QMainWindow):
 
@@ -322,7 +228,7 @@ class MainWindow(QtGui.QMainWindow):
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
 		
 		# read the alignment file
-        f = open("data/cTIM_align_small.fa")
+        f = open("data/cTIM_core_align.fa")
         lines = f.readlines()
         f.close()
 		
@@ -338,11 +244,11 @@ class MainWindow(QtGui.QMainWindow):
             seq=[]
             for c in self.TIMs_raw[seq_id]:
                 if c=='-':
-                    seq.append(0)
+                    seq.append(color.gray)
                 elif c =='\n':
                     continue
                 else:
-                    seq.append(1)
+                    seq.append(color.black)
             self.TIMs.update_color(seq_id, seq)
 
     def close(self):

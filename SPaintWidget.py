@@ -158,7 +158,7 @@ class MyPaintWidget(QtGui.QWidget):
         elif self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
             if (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position < y \
                         < ((self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position + self.__scroll_button_height):
-                d =  (y - self.cursor_pre_y) /200.0
+                d =  (y - self.cursor_pre_y) /150.0
                 print d
                 self.update_scroll(d)
                 self.cursor_pre_x = x
@@ -189,6 +189,10 @@ class MyPaintWidget(QtGui.QWidget):
         self.sequences["len"] = len(self.sequences) - 2
         if self.sequences["max_len_freg"] < len(self.sequences[sequence_id]):
             self.sequences["max_len_freg"] = len(self.sequences[sequence_id])
+
+    def redraw_colors(self):
+        self.__TIMs_redraw = True
+        self.update()
 
 
     def registerClickCallBack(self, d):
