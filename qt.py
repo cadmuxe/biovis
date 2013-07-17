@@ -1,29 +1,43 @@
+#!/usr/bin/env python -W ignore::DeprecationWarning
+
 import sys
 from PySide import QtCore, QtGui, QtOpenGL
-from OpenGL import GLU
-from OpenGL.GL import *
-from numpy import array
-from mmLib import FileIO, Viewer, OpenGLDriver
+import OpenGL
 
+from OpenGL.GL            import *
+from OpenGL.GLU           import *
+from OpenGL.GLUT          import *
 
+from mmLib import Constants, FileIO, Viewer, R3DDriver, OpenGLDriver, Structure, TLS
 
+from GLPropertyBrowser import *
+	    		
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
+        
         self.parent = parent
         QtOpenGL.QGLWidget.__init__(self, parent)
         self.opengl_driver = OpenGLDriver.OpenGLDriver()
+
         Viewer.GLViewer.__init__(self)
+        
         self.load_struct()
         self.__key = None
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-
+                
+        self.prop_editor = GLPropertyBrowserDialog(
+            glo_root      = self.glstruct.glo_get_root() )
+                  
     def load_struct(self, path = None):
-        path = "data/scTIM.pdb"
-
+        
+        path = "./data/scTIM.pdb"
+        
         try:
             struct = FileIO.LoadStructure(
-                fil = path,
-                distance_bonds = True)
+                fil              = path,
+                library_bonds    = True,
+                distance_bonds   = True)
+                
         except IOError:
             error("file not found: %s" % (path))
             return None
@@ -31,25 +45,14 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         struct_desc = {}
         struct_desc["struct"] = struct
         struct_desc["path"] = path
-
-        glstruct = self.glv_add_struct(struct)
-
-        print "iter"
-        root = glstruct.glo_iter_children()
-        objects = []
-        for r in root:
-			objects.append(r)
-		
-        print "color trace"
-        print objects[2].glal_calc_color_trace()    
-        print objects[3].glal_calc_color_trace()
+                
+        self.glstruct = self.glv_add_struct(struct)
         
-#        iters = objects[2].glal_iter_atoms()
-#        for i in iters:
-#            print i
-		  
         return struct
-
+    
+    def showDialog(self):
+        return
+             
     def initializeGL(self):
         self.glv_init()
 
@@ -105,7 +108,6 @@ class ListWidgetItem(QtGui.QListWidgetItem):
     def get_fragment_id(self):
         return self.frag_id
 
-
 class MyPaintWidget(QtGui.QWidget):
     def __init__(self,parent=None):
         QtGui.QWidget.__init__(self,parent)
@@ -135,7 +137,6 @@ class MyPaintWidget(QtGui.QWidget):
             return QtCore.Qt.green
         else:
             pass
-
 
     def paintEvent(self, event):
         self.paint_freg_heigh = event.rect().height() / self.sequences["len"]
@@ -182,8 +183,6 @@ class MyPaintWidget(QtGui.QWidget):
         print self.on_sequences_id,self.on_freg_id
         self.update()
 
-
-
     def update_color(self,sequence_id, new_color_list):
         self.sequences[sequence_id] = new_color_list
         self.sequences["len"] = len(self.sequences) - 2
@@ -208,17 +207,18 @@ class MyPaintWidget(QtGui.QWidget):
 class MainWindow(QtGui.QMainWindow):
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self, None, QtCore.Qt.WindowStaysOnTopHint)
+        QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
         self.setWindowTitle("2013 BioVis Contest")
         self.resize(800, 600)
 
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
-
-        #self.glWidget = GLWidget(self.centralWidget)
+        
         self.glWidgetSC = GLWidget(self.centralWidget)
-        self.glWidgetD = GLWidget(self.centralWidget)
+        #self.glWidgetD = GLWidget(self.centralWidget)
+        
+        self.glWidgetSC.showDialog()
         
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
@@ -228,7 +228,7 @@ class MainWindow(QtGui.QMainWindow):
         self.scTIMlabel = QtGui.QLabel("scTIM")
 
         self.gridlayout.addWidget(self.glWidgetSC, 0, 0, 2, 1)
-        self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
+        #self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
 
         self.gridlayout.addWidget(self.dTIMLabel, 0, 2, 1, 1)
         self.gridlayout.addWidget(self.dTIMList, 1, 2, 1, 1)
@@ -253,7 +253,7 @@ class MainWindow(QtGui.QMainWindow):
         self.initMenus()
         self.initListWidget()
         self.initTIMs()
-
+                
     def initActions(self):
         self.exitAction = QtGui.QAction('Quit', self)
         self.exitAction.setShortcut('Ctrl+Q')
@@ -279,12 +279,10 @@ class MainWindow(QtGui.QMainWindow):
         for i in id_list:
             self.dTIMList.setCurrentRow(i-2,QtGui.QItemSelectionModel.Select)
 
-
     def initMenus(self):
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
         fileMenu.addAction(self.exitAction)
-
 
 	# Create the lists in the right panel
     def initTIMs(self):
