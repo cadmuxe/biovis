@@ -4,15 +4,16 @@ import sys
 from PySide import QtCore, QtGui, QtOpenGL
 import OpenGL
 
-from OpenGL.GL            import *
-from OpenGL.GLU           import *
-from OpenGL.GLUT          import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
 
 from mmLib import Constants, FileIO, Viewer, R3DDriver, OpenGLDriver, Structure, TLS
 from SPaintWidget import *
 
 from GLPropertyBrowser import *
-	    		
+from sequenceSet import sequenceSet
+
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
         
@@ -190,35 +191,29 @@ class MainWindow(QtGui.QMainWindow):
         fileMenu = menuBar.addMenu('&File')
         fileMenu.addAction(self.exitAction)
 
-	# Create the lists in the right panel
+    # Create the lists in the right panel
     def initTIMs(self):
          
-		# read dTIM
+        # read dTIM
         f = open("data/dTIM.fa")
         line = f.readline()
         f.close()
+        # add each element to a list
+        dTIM = [frag for frag in line]
 		
-		# add each element to a list
-        dTIM =[]
-        for c in line:
-            dTIM.append(c)
-		
-		# read scTIM
+        # read scTIM
         f = open("data/scTIM.fa")
         line = f.readline()
-       	f.close()
-        
+        f.close()
         # add each element to a list
-        scTIM =[]
-        for c in line:
-             scTIM.append(c)
+        scTIM =[frag for frag in line]
 
-		# create one list of both TIMs
+        # create one list of both TIMs
         frag_id = range(2,300)
         items = zip(frag_id,dTIM,scTIM)
         self.__different_frag_id=set()
 		
-		# iterate and find the similarities, then color them accordingly
+        # iterate and find the similarities, then color them accordingly
         for item in items:
             item_d = ListWidgetItem(item[1], self.dTIMList, item[0])
             item_sc = ListWidgetItem(item[2], self.scTIMList, item[0])
@@ -227,29 +222,10 @@ class MainWindow(QtGui.QMainWindow):
                 item_d.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
 		
-		# read the alignment file
-        f = open("data/cTIM_core_align.fa")
-        lines = f.readlines()
-        f.close()
-		
-		# determine the orientation and store in a list
-        self.TIMs_raw=[]
-        for l in lines:
-            if l[0] == ">" or l[0] == '\n':
-                continue
-            self.TIMs_raw.append(l)
-        
-        # bottom widget
-        for seq_id in range(len(self.TIMs_raw)):
-            seq=[]
-            for c in self.TIMs_raw[seq_id]:
-                if c=='-':
-                    seq.append(color.gray)
-                elif c =='\n':
-                    continue
-                else:
-                    seq.append(color.black)
-            self.TIMs.update_color(seq_id, seq)
+        # load TIMs, and coloring them and update for darwing
+        self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa")
+        self.__sequenceSet.frequencyColor()                 # could use other coloring method
+        self.__sequenceSet.updateColor(self.TIMs)
 
     def close(self):
         QtGui.qApp.quit()

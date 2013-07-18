@@ -1,12 +1,29 @@
 from PySide import QtCore, QtGui, QtOpenGL
+from random import choice
 
 class color(object):
     gray = QtCore.Qt.gray
     black = QtCore.Qt.black
     red = QtCore.Qt.red
-    gree = QtCore.Qt.green
-    def __getattribute__(self, item):
-        return self.item
+    green = QtCore.Qt.green
+    blue = QtCore.Qt.blue
+    cyan = QtCore.Qt.cyan
+
+    red1 = QtGui.QColor(128,35,41)
+    red2 = QtGui.QColor(148,28,52)
+    red3 = QtGui.QColor(193,61,105)
+    red4 = QtGui.QColor(220,118,160)
+    red5 = QtGui.QColor(236,168,200)
+
+    @staticmethod
+    def  random(not_color):
+        """
+        pick an random color which is not not_color
+        """
+        c = not_color
+        while c == not_color:
+            c = choice([color.green, color.blue, color.cyan])
+        return c
 
 
 class MyPaintWidget(QtGui.QWidget):
@@ -15,15 +32,15 @@ class MyPaintWidget(QtGui.QWidget):
         self.setBackgroundRole(QtGui.QPalette.Base)
 
         # {id:[color], 1:[red,green, ...]}  id: sequences id, color: the color for each amino acid.
-        self.sequences={"len":0, "max_len_freg":0}
+        self.sequences={"len":0, "max_len_frag":0}
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setMouseTracking(True)
 
         # whether to redraw the cache
         self.__TIMs_redraw = True
-        # mouse on which sequence and fregment
+        # mouse on which sequence and fragment
         self.on_sequences_id = None
-        self.on_freg_id = None
+        self.on_frag_id = None
 
         self.__callback={} # callback function,  mouse_click, mouse_over
 
@@ -59,12 +76,12 @@ class MyPaintWidget(QtGui.QWidget):
 
 
     def paintEvent(self, event):
-        self.paint_freg_heigh = 2
-        self.paint_freg_width = event.rect().width() / self.sequences["max_len_freg"]   # assume all the sequences have the same length
+        self.paint_frag_heigh = 2
+        self.paint_frag_width = event.rect().width() / self.sequences["max_len_frag"]   # assume all the sequences have the same length
 
         # cache the result (TIMs image)
         if self.__TIMs_redraw:
-            self.__TIMs_cache = QtGui.QPixmap(event.rect().width(), self.sequences["len"]*self.paint_freg_heigh)
+            self.__TIMs_cache = QtGui.QPixmap(event.rect().width(), self.sequences["len"]*self.paint_frag_heigh)
             self.__TIMs_cache.fill(QtCore.Qt.white)
             painter = QtGui.QPainter(self.__TIMs_cache)
             #painter.begin(self.__TIMs_cache)
@@ -72,8 +89,8 @@ class MyPaintWidget(QtGui.QWidget):
             for x in range(0,self.sequences["len"]):
                 for y in range(0, len(self.sequences[x])):
                     painter.setBrush(self.sequences[x][y])
-                    painter.drawRect(y * self.paint_freg_width, x*self.paint_freg_heigh,
-                                     self.paint_freg_width, self.paint_freg_heigh)
+                    painter.drawRect(y * self.paint_frag_width, x*self.paint_frag_heigh,
+                                     self.paint_frag_width, self.paint_frag_heigh)
             painter.end()
             self.__TIMs_redraw = False
             self.__update_size_info()
@@ -116,14 +133,14 @@ class MyPaintWidget(QtGui.QWidget):
             painter_s.setPen(QtCore.Qt.NoPen)
             for y in range(0, len(self.sequences[self.on_sequences_id])):
                 painter_s.setBrush(self.sequences[self.on_sequences_id][y])
-                painter_s.drawRect(y * self.paint_freg_width, 0,
-                                 self.paint_freg_width, 10)
+                painter_s.drawRect(y * self.paint_frag_width, 0,
+                                 self.paint_frag_width, 10)
             painter_s.setPen(QtCore.Qt.white)
             painter_s.setBrush(QtCore.Qt.NoBrush)
             painter_s.drawRect(0,0,self.__TIMs_cache_width, 9)
             painter_s.end()
             new_selection = selection.scaled(self.__TIMs_cache_width,10)
-            painter.drawPixmap(0,self.on_sequences_id * self.paint_freg_heigh-(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position, new_selection)
+            painter.drawPixmap(0,self.on_sequences_id * self.paint_frag_heigh-(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position, new_selection)
         painter.end()
 
     def mousePressEvent(self,event):
@@ -147,13 +164,13 @@ class MyPaintWidget(QtGui.QWidget):
 
         # draw selection rectangle
         if x < self.__scrollbar_postion_x:
-            self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position) / self.paint_freg_heigh
-            self.on_freg_id = x / self.paint_freg_width
+            self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position) / self.paint_frag_heigh
+            self.on_frag_id = x / self.paint_frag_width
             if self.on_sequences_id >= self.sequences["len"]:
                 self.on_sequences_id = self.sequences["len"] - 1
-            if self.on_freg_id >= len(self.sequences[self.on_sequences_id]):
-                self.on_freg_id = len(self.sequences[self.on_sequences_id]) -1
-            print (self.on_sequences_id,self.on_freg_id)
+            if self.on_frag_id >= len(self.sequences[self.on_sequences_id]):
+                self.on_frag_id = len(self.sequences[self.on_sequences_id]) -1
+            print (self.on_sequences_id,self.on_frag_id)
 
         elif self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
             if (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position < y \
@@ -175,24 +192,28 @@ class MyPaintWidget(QtGui.QWidget):
         """
         self.sequences[sequence_id] = new_color_list
         self.sequences["len"] = len(self.sequences) - 2
-        if self.sequences["max_len_freg"] < len(self.sequences[sequence_id]):
-            self.sequences["max_len_freg"] = len(self.sequences[sequence_id])
+        if self.sequences["max_len_frag"] < len(self.sequences[sequence_id]):
+            self.sequences["max_len_frag"] = len(self.sequences[sequence_id])
 
 
-    def update_freg_color(self, sequence_id, freg_id, color):
+    def update_frag_color(self, sequence_id, frag_id, color):
         if not self.sequences.has_key(sequence_id):
             self.sequences[sequence_id] = []
         try:
-            self.sequences[sequence_id][freg_id] = color
+            self.sequences[sequence_id][frag_id] = color
         except IndexError:
             self.sequences[sequence_id].append(color)
         self.sequences["len"] = len(self.sequences) - 2
-        if self.sequences["max_len_freg"] < len(self.sequences[sequence_id]):
-            self.sequences["max_len_freg"] = len(self.sequences[sequence_id])
+        if self.sequences["max_len_frag"] < len(self.sequences[sequence_id]):
+            self.sequences["max_len_frag"] = len(self.sequences[sequence_id])
 
     def redraw_colors(self):
         self.__TIMs_redraw = True
         self.update()
+
+    def clearColor(self):
+        self.sequences={"len":0, "max_len_frag":0}
+        self.redraw_colors()
 
 
     def registerClickCallBack(self, d):
