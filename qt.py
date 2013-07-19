@@ -91,7 +91,7 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def glv_redraw(self):
         self.updateGL()
         # why need to use updateGL, but glv_render() not works.
-		# Answer: update Tells QT to refresh the widget
+        # Answer: update Tells QT to refresh the widget
     def update_select(self, fragment_id_list=[]):
         self.update_fragment_id_list(fragment_id_list)
         self.glv_redraw()
@@ -200,7 +200,7 @@ class MainWindow(QtGui.QMainWindow):
         f.close()
         # add each element to a list
         dTIM = [frag for frag in line]
-		
+
         # read scTIM
         f = open("data/scTIM.fa")
         line = f.readline()
@@ -212,7 +212,7 @@ class MainWindow(QtGui.QMainWindow):
         frag_id = range(2,300)
         items = zip(frag_id,dTIM,scTIM)
         self.__different_frag_id=set()
-		
+
         # iterate and find the similarities, then color them accordingly
         for item in items:
             item_d = ListWidgetItem(item[1], self.dTIMList, item[0])
@@ -221,7 +221,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.__different_frag_id.add(item[0])
                 item_d.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
-		
+
         # load TIMs, and coloring them and update for darwing
         self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa")
         self.__sequenceSet.frequencyColor()                 # could use other coloring method

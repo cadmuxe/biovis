@@ -1,7 +1,7 @@
 __author__ = 'cadmuxe'
 
 from SPaintWidget import color
-import sys
+from LevenshteinDistance import LevenshteinDistance as LeveDist
 
 class sequence(object):
     """
@@ -32,20 +32,26 @@ class sequenceSet(object):
     """
     Set of sequences
     """
-    def __init__(self, filename=None):
+    def __init__(self, TIMs_filename=None, scTIM_filename=None):
 
         self.__sequence=[]
         self.__color = None
-        if filename is not None:
-            self.loadFromFile(filename)
+        if TIMs_filename is not None:
+            self.loadTIMsFromFile(TIMs_filename)
+        if scTIM_filename is not None:
+            self.loadscTIMFromFile(scTIM_filename)
 
-    def loadFromFile(self,filename):
+    def loadTIMsFromFile(self,filename):
         f = open(filename)
         lines = f.readlines()
         f.close()
         for x in range(len(lines)):
             if lines[x][0] == '>':
                 self.__sequence.append(sequence(lines[x][1:], lines[x+1]))
+    def loadscTIMFromFile(self, filename):
+        f = open(filename)
+        self.__scTIM = sequence("scTIM",f.readline().strip())
+        f.close()
     def __getitem__(self, item):
         return self.__sequence[item]
     def __len__(self):
@@ -79,11 +85,12 @@ class sequenceSet(object):
 
     def frequencyColor(self):
         """
-        coloring the sequences, the fragment in the same column with the largest frequency are colored with red
-        for other fragment, if the adjacent fragment(in the column) are same, they will be colored in same color
+        coloring the sequences, the fragment in the same column with the largest frequency 
+        are colored with red for other fragment, if the adjacent fragment(in the column) 
+        are same, they will be colored in same color
         """
-        self._calculate_frag_frequency()
-        self._sort_by_frag_frequency()
+        self.calculate_frag_frequency()
+        self.sort_by_frag_frequency()
         # initialize __color to store result
         self.__color = [[] for i in range(len(self.__sequence))]
         pre_frag = ''
@@ -94,7 +101,8 @@ class sequenceSet(object):
                     if self.__sequence[seq_id][frag_id] == '-':
                         pre_color = color.gray
                     elif self.__sequence[seq_id][frag_id] == self.frag_frequency[frag_id][1]:
-                        pre_color = color.red       # coloring the largest frequency fragment in the column
+                        # coloring the largest frequency fragment in the column
+                        pre_color = color.red       
                     elif self.__sequence[seq_id][frag_id] != pre_frag:
                         #if the previous fragment and the current is different, change a color
                         pre_color = color.random(pre_color)
@@ -104,7 +112,7 @@ class sequenceSet(object):
         return
 
 
-    def _calculate_frag_frequency(self):
+    def calculate_frag_frequency(self):
         """
         calculate the fragment which has the largest frequency in each column
         """
@@ -115,7 +123,8 @@ class sequenceSet(object):
         # [(fragmentId, fragment, frequency)]
         self.frag_frequency=[]
         for frag_id in range(max_len):
-            frequency_list={}   # store the frequency of each kind of fragment(residue) in one colum
+            # store the frequency of each kind of fragment(residue) in one colum
+            frequency_list={}   
             for seq in self.__sequence:
                 try:
                     if seq[frag_id] == '-':     # do not calculate '-'
@@ -124,16 +133,18 @@ class sequenceSet(object):
                         frequency_list[seq[frag_id]] += 1
                     else:
                         frequency_list[seq[frag_id]] = 0
-                # happened when seq do not long enough, can not assume all sequence have the same length
+                # happened when seq do not long enough, can not assume 
+                # all sequence have the same length
                 except IndexError:
                     continue
-            # find out the fragment that has largest frequency in each column and add them to the result
+            # find out the fragment that has largest frequency in each column
+            # and add them to the result
             m = max(frequency_list.values())
             for (frag, frequency) in frequency_list.items():
                 if frequency == m:
                     self.frag_frequency.append((frag_id,frag, frequency))
 
-    def _sort_by_frag_frequency(self):
+    def sort_by_frag_frequency(self):
         """
         sort sequences by the frag_frequency, a larger fragment frequency has a big weight
         """
@@ -145,3 +156,72 @@ class sequenceSet(object):
                     seq.weight +=(self.frag_frequency[frag_id][2]/largest)
         # sort the sequence
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+
+    def sort_by_edit_dist(self):
+        """
+        Sort by edit distance from scTIM
+        Original from John Wenskovich in Java
+        """
+        leve  = LeveDist(1, 1, 1)
+        for seq in self.__sequence:
+            seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+    def sort_by_weighted_edit_dist(self):
+        """
+        Sort by weighted edit distance from scTIM
+        again from John
+        """
+        leve = LeveDist(5, 5, 3)
+        for seq in self.__sequence:
+            seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+
+    def sort_by_num_of_common_residues_with_scTIM(self):
+        """
+        sort by number of residues in common with scTIM
+        (single-sequence alignment)
+        From John
+        """
+        for seq in self.__sequence:
+            similarityCounter = 0
+            for i in range(min(len(seq.seq), len(self.__scTIM.seq))):
+                if seq.seq[i] == self.__scTIM.seq[i]:
+                    similarityCounter += 1
+            seq.weight = similarityCounter
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+    
+    def sort_by_num_of_common_residues_with_scTIM_norm(self):
+        """
+        sort by percent of residues in common with scTIM
+        (normalized single-sequence alignment)
+        Hello John
+        """
+        for seq in self.__sequence:
+            similarityPercentageCounter = 0.0
+            for i in range(min(len(seq.seq), len(self.__scTIM.seq))):
+                if seq.seq[i] == self.__scTIM.seq[i]:
+                    similarityPercentageCounter += 1
+            seq.weight = similarityPercentageCounter / len(seq.seq)
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+    
+    # John have a sort function that is sort by number of residues in common
+    # with scTIM without consideration of sequence postion
+    # Is it  really useful? not move to python now 
+    
+    def sort_by_number_of_residue_seq_of_len_n(self, n):
+        """
+        sort by number of residue sequences of length N in common
+        Thank you John
+        """
+        for seq in self.__sequence:
+            similarityLengthCounter = 0
+            for i in range(min(len(seq.seq), len(self.__scTIM.seq))):
+                if seq.seq[i:i+n] == self.__scTIM.seq[i:i+n]:
+                    similarityLengthCounter += 1
+            seq.weight = similarityLengthCounter
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+        
+
+        
+        
+
