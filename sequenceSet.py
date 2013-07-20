@@ -2,6 +2,7 @@ __author__ = 'cadmuxe'
 
 from SPaintWidget import color
 from LevenshteinDistance import LevenshteinDistance as LeveDist
+from sequenceCounter import sequenceCounter
 
 class sequence(object):
     """
@@ -203,11 +204,58 @@ class sequenceSet(object):
                     similarityPercentageCounter += 1
             seq.weight = similarityPercentageCounter / len(seq.seq)
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+   
+    def sort_by_number_of_common_residues_with_scTIM_without_position(self):
+        """
+        sort by number of residue in common with scTIM without consideration
+        of sequence position
+        @ John
+        """
+        scTIMCounter = sequenceCounter() 
+        overallCount = 0
+
+        for frag in self.__scTIM.seq:
+            scTIMCounter.addResidue(frag)
+        scTIMResidues = scTIMCounter.getResidueCounts()
+        for seq in self.__sequence:
+            counter = sequenceCounter()
+            for frag in seq.seq:
+                counter.addResidue(frag)
+            loopResidues = counter.getResidueCounts()
+            for k in range(26):
+                if loopResidues[k] > scTIMResidues[k]:
+                    overallCount += scTIMResidues[k]
+                else:
+                    overallCount += loopResidues[k]
+            seq.weight = overallCount
     
-    # John have a sort function that is sort by number of residues in common
-    # with scTIM without consideration of sequence postion
-    # Is it  really useful? not move to python now 
-    
+    def sort_by_percent_of_common_residues_with_scTIM_without_position(self):
+        """
+        sort by percent of residue in common with scTIM without consideration
+        of sequence position
+        Hi John
+        """
+        scTIMCounter = sequenceCounter() 
+        overallCount = 0
+        scTIMPercentCount =0.0
+
+        for frag in self.__scTIM.seq:
+            scTIMCounter.addResidue(frag)
+        scTIMResidues = scTIMCounter.getResidueCounts()
+        for res in scTIMResidues:
+            scTIMPercentCount += res
+        for seq in self.__sequence:
+            counter = sequenceCounter()
+            for frag in seq.seq:
+                counter.addResidue(frag)
+            loopResidues = counter.getResidueCounts()
+            for k in range(26):
+                if loopResidues[k] > scTIMResidues[k]:
+                    overallCount += scTIMResidues[k]
+                else:
+                    overallCount += loopResidues[k]
+            seq.weight = overallCount/scTIMPercentCount
+
     def sort_by_number_of_residue_seq_of_len_n(self, n):
         """
         sort by number of residue sequences of length N in common
