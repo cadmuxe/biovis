@@ -56,7 +56,7 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.glstruct = self.glv_add_struct(struct)
         
         self.prop_editor = GLPropertyBrowserDialog(
-            glo_root      = self.glstruct.glo_get_root() )
+            glo_root      = self.glstruct )
         
         self.prop_editor.show()
         
@@ -149,13 +149,13 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
         self.setWindowTitle("2013 BioVis Contest")
-        self.resize(800, 600)
+        self.resize(1280, 1024)
 
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
         self.glWidgetSC = GLWidget(self.centralWidget)
-        #self.glWidgetD = GLWidget(self.centralWidget)
+        self.glWidgetD = GLWidget(self.centralWidget)
                 
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
@@ -165,7 +165,7 @@ class MainWindow(QtGui.QMainWindow):
         self.scTIMlabel = QtGui.QLabel("scTIM")
 
         self.gridlayout.addWidget(self.glWidgetSC, 0, 0, 2, 1)
-        #self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
+        self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
 
         self.gridlayout.addWidget(self.dTIMLabel, 0, 2, 1, 1)
         self.gridlayout.addWidget(self.dTIMList, 1, 2, 1, 1)
