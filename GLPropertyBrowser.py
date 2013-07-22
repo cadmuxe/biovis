@@ -41,7 +41,7 @@ class EnumeratedStringEntry(QtGui.QComboBox):
         
         self.enum_list = enum_list[:]
         self.string    = None
-
+        
     def activate(self, text):
         self.set_string(text)
 
@@ -79,6 +79,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
         ## sort pages: make sure Show/Hide is the first page
         catagories = catagory_dict.keys()
         if "Show/Hide" in catagories:
+            #print "show hide"
             catagories.remove("Show/Hide")
             catagories.insert(0, "Show/Hide")
             
@@ -98,8 +99,11 @@ class GLPropertyEditor(QtGui.QTabWidget):
         
         for prop_desc in self.gl_object.glo_iter_property_desc():
 
+            #print "prop_desc: " + prop_desc["name"]
+
             ## skip hidden properties
             if prop_desc.get("hidden", False)==True:
+                #print "hidden"
                 continue
 
             ## get the catagory name, default to "Misc"
@@ -118,7 +122,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
         num_properties = len(prop_desc_list)
 
         ## create table widget
-        table = QtGui.QTableWidget(2, num_properties, None)
+        table = QtGui.QTableWidget(num_properties, 2 , None)
         #table.set_border_width(5)
         #table.set_row_spacings(5)
         #table.set_col_spacings(10)
@@ -132,14 +136,15 @@ class GLPropertyEditor(QtGui.QTabWidget):
         ## boolean types first since the toggle widgets don't look good mixed
         ## with the entry widgets
         for prop_desc in prop_desc_list:
-            name = prop_desc["name"]
             
-            #print "name: " + name
+            name = prop_desc["name"]
             
             ## only handling boolean right now
             if prop_desc["type"]!="boolean":
                 continue
-
+            
+            #print "name: " + name
+                
             ## create the widget for this property
             edit_widget = self.new_property_edit_widget(prop_desc)
 
@@ -152,14 +157,15 @@ class GLPropertyEditor(QtGui.QTabWidget):
             #align.add(edit_widget)
 
             ## attach to table
-            table.setCellWidget(0, table_row, edit_widget)
+            #print "table row: " + str(table_row)
+            table.setCellWidget(table_row, 0, edit_widget)
 
             table_row += 1
-
+        #print "exit boolean list"
         ## now create all the widgets for non-boolean types
         for prop_desc in prop_desc_list:
             name = prop_desc["name"]
-
+            
             ## boolean types were already handled
             if prop_desc["type"]=="boolean":
                 continue
@@ -169,7 +175,9 @@ class GLPropertyEditor(QtGui.QTabWidget):
             label_widget = self.new_property_label_widget(prop_desc)
             #align = gtk.Alignment(0.0, 0.5, 0.0, 0.0)
             #align.add(label_widget)
-            table.setCellWidget(0,  table_row,
+            
+            #print "table row: " + str(table_row)
+            table.setCellWidget(table_row, 0,
                          label_widget)
 
             ## create the edit widget
@@ -183,11 +191,11 @@ class GLPropertyEditor(QtGui.QTabWidget):
             ## add to size group and attach to table
             #size_group.add_widget(edit_widget)
             
-            table.setCellWidget(1, table_row, edit_widget)
+            table.setCellWidget(table_row, 1, edit_widget)
 
             table_row += 1
 
-        table.show()
+        #table.show()
         return table
 
     def destroy(self, widget):
@@ -390,12 +398,14 @@ class GLPropertyEditor(QtGui.QTabWidget):
         """Read values from widgets and apply them to the gl_object
         properties.
         """
+                
         update_dict = {}
         
         for prop in self.gl_object.glo_iter_property_desc():
 
             ## skip read_only properties
             if prop.get("read_only", False)==True:
+                #print "read only: " + prop["name"]
                 continue
 
             ## property name
@@ -408,8 +418,16 @@ class GLPropertyEditor(QtGui.QTabWidget):
             
             ## retrieve data based on widget type
             if prop["type"]=="boolean":
-                if widget.checkStateSet() == QtCore.Qt.Checked:
+               # print "state"
+                #print widget.isChecked()
+                if widget.isChecked() == True:
                     update_dict[name] = True
+                    if prop["name"] == "cpk":
+                        print "checked in apply: " + prop["name"]
+                        print prop.keys()
+                        print " "
+                        print prop.values()
+                        print " "
                 else:
                     update_dict[name] = False
 
@@ -438,8 +456,11 @@ class GLPropertyEditor(QtGui.QTabWidget):
             elif prop["type"]=="enum_string":
                 update_dict[name] = widget.get_string()
                 
+        print "update dict"
+        print update_dict.keys()
+        print " "
+        print update_dict.values()
         self.gl_object.glo_update_properties(**update_dict)
-
 
 class GLPropertyTreeControl(QtGui.QTreeView):
     """Hierarchical tree view of the GLObjects which make up
@@ -498,7 +519,7 @@ class GLPropertyTreeControl(QtGui.QTreeView):
         #print self.selection
         #print self.currentIndex().row(), self.currentIndex().column()
         
-        glo = self.get_gl_object(index.row() * self.model.rowCount() + index.column())    
+        glo = self.get_gl_object(index.row() * self.model.rowCount() + index.column())
         self.glo_select_cb(glo) 
         
     # def row_activated_cb(self, tree_view, path, column):
@@ -560,24 +581,31 @@ class GLPropertyTreeControl(QtGui.QTreeView):
             
             item = None
             
-            selected_glo = self.model.invisibleRootItem()
-            def redraw_recurse(glo, parent):
+            def redraw_recurse(parent, child, widget):
+                                   
+                gl_obj = None
                 
-                item = QtGui.QStandardItem(glo.glo_name())
+                if child is None:
+                    gl_obj = parent
+                else:
+                    gl_obj = child
+              
+                item = QtGui.QStandardItem( gl_obj.glo_name() )
+                widget.appendRow(item)
                 #item.setData(QVariant(glo))
                 
-                parent.appendRow(item)
-                
                 #path = self.model.get_path(miter)
-                self.path_glo_dict[item.row() * self.model.rowCount() + item.column()] = glo
+                self.path_glo_dict[item.row() * self.model.rowCount() 
+                    + item.column()] = gl_obj
                 #self.model.set(miter, 0, glo.glo_name())
-    
-                for child in glo.glo_iter_children():
+                
+                for child in gl_obj.glo_iter_children():
                     #print "insert name"
                     #print child.glo_name()
-                    redraw_recurse(child, item)
-        
-            redraw_recurse(self.gl_object_root, selected_glo)
+                    redraw_recurse(gl_obj, child, item)
+                    
+            selected_glo = self.model.invisibleRootItem()
+            redraw_recurse(self.gl_object_root, None, selected_glo)
     
             ## restore expansions and selections
             # for path, glo in self.path_glo_dict.items():
@@ -696,7 +724,7 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
         self.gl_prop_editor = None
         #self.select_gl_object(self.gl_object_root)
 
-        self.show()
+        #self.show()
     
     # def view_jump_cb(self, button, junk1, junk2):
     #     """Callback for Jump Button.
@@ -723,7 +751,7 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
     def select_view(self, vdict):
         """Applies the view dictionary (vdict) to the current
         viewer.
-        """
+        """ 
         if vdict["vtype"]=="orientation":
             glo = self.gl_tree_ctrl.gl_object_root
             glo.properties.update(**vdict)
@@ -814,7 +842,9 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
     def response_cb(self):
         
         #print "apply"
+        #print self.gl_prop_editor
         if self.gl_prop_editor is not None:
+            #print "update in response"
             self.gl_prop_editor.update()    
 
     def rebuild_gl_object_tree(self):
@@ -826,6 +856,9 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
         """Callback invoked by the GLPropertyTreeControl when a
         GLObject is selected
         """
+        
+        #print "gl_tree_ctrl_selected"
+        
         ## remove the current property editor if there is one
         if self.gl_prop_editor is not None:
             if self.gl_prop_editor.gl_object==glo:

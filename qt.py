@@ -1,14 +1,19 @@
 #!/usr/bin/env python -W ignore::DeprecationWarning
 
 import sys
-from PySide import QtCore, QtGui, QtOpenGL
+# from PySide import QtCore, QtGui, QtOpenGL
+
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+from PyQt4.QtOpenGL import *
+
 import OpenGL
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
-from mmLib import Constants, FileIO, Viewer, R3DDriver, OpenGLDriver, Structure, TLS
+from mmLib import FileIO, Structure, Viewer, OpenGLDriver
 from SPaintWidget import *
 
 from GLPropertyBrowser import *
@@ -18,18 +23,18 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
         
         self.parent = parent
-        QtOpenGL.QGLWidget.__init__(self, parent)
-        self.opengl_driver = OpenGLDriver.OpenGLDriver()
-
-        Viewer.GLViewer.__init__(self)
+        self.glstruct = None
         
-        self.load_struct()
+        QtOpenGL.QGLWidget.__init__(self, self.parent)
+        self.opengl_driver = OpenGLDriver.OpenGLDriver()
+        OpenGL.ERROR_CHECKING = False
+                
         self.__key = None
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-                
-        self.prop_editor = GLPropertyBrowserDialog(
-            glo_root      = self.glstruct.glo_get_root() )
-                  
+        
+        Viewer.GLViewer.__init__(self)
+        self.load_struct()
+                    
     def load_struct(self, path = None):
         
         path = "./data/scTIM.pdb"
@@ -38,10 +43,10 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
             struct = FileIO.LoadStructure(
                 fil              = path,
                 library_bonds    = True,
-                distance_bonds   = True)
-                
+                distance_bonds   = True )
+        
         except IOError:
-            error("file not found: %s" % (path))
+            error( "file not found: %s" % (path) )
             return None
 
         struct_desc = {}
@@ -50,21 +55,46 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
                 
         self.glstruct = self.glv_add_struct(struct)
         
+        self.prop_editor = GLPropertyBrowserDialog(
+            glo_root      = self.glstruct.glo_get_root() )
+        
+        self.prop_editor.show()
+        
         return struct
     
-    def showDialog(self):
-        return
-             
+    def getStruct(self):
+        return self.glstruct
+        
     def initializeGL(self):
+        #glutInit(sys.argv)
+        
         self.glv_init()
 
     def resizeGL(self, width, height):
         self.glv_resize(width, height)
 
     def paintGL(self):
+            
         self.glv_render()
 
     def glv_render(self):
+           
+        # def print_recurse(gl_obj):
+        #     
+        #     for prop in gl_obj.glo_iter_property_desc():
+        #         if prop['name'][0:3] == "cpk":
+        #             print prop['name']
+        #             print prop.keys()
+        #             print " "
+        #             print prop.values()
+        #             print " "
+        #     
+        #     for child in gl_obj.glo_iter_children():
+        #         print_recurse(child)
+        # 
+        # if self.glstruct is not None:        
+        #     print_recurse(self.glstruct)
+                
         self.glv_render_one(self.opengl_driver)
         glFlush()
 
@@ -90,9 +120,11 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.__key = None
     def glv_redraw(self):
         self.updateGL()
+        #print "redraw"
         # why need to use updateGL, but glv_render() not works.
         # Answer: update Tells QT to refresh the widget
     def update_select(self, fragment_id_list=[]):
+        #print "update_select"
         self.update_fragment_id_list(fragment_id_list)
         self.glv_redraw()
 
@@ -124,9 +156,7 @@ class MainWindow(QtGui.QMainWindow):
         
         self.glWidgetSC = GLWidget(self.centralWidget)
         #self.glWidgetD = GLWidget(self.centralWidget)
-        
-        self.glWidgetSC.showDialog()
-        
+                
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
