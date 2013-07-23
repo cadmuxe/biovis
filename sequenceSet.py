@@ -96,12 +96,12 @@ class sequenceSet(object):
         self.__color = [[] for i in range(len(self.__sequence))]
         pre_frag = ''
         pre_color = None
-        for frag_id in range(len(self.frag_frequency)):
+        for frag_id in range(len(self.max_frag_frequency)):
             for seq_id in range( len(self.__sequence)):
                 try:
                     if self.__sequence[seq_id][frag_id] == '-':
                         pre_color = color.gray
-                    elif self.__sequence[seq_id][frag_id] == self.frag_frequency[frag_id][1]:
+                    elif self.__sequence[seq_id][frag_id] == self.max_frag_frequency[frag_id][1]:
                         # coloring the largest frequency fragment in the column
                         pre_color = color.red       
                     elif self.__sequence[seq_id][frag_id] != pre_frag:
@@ -123,6 +123,7 @@ class sequenceSet(object):
         # store the frequency informaiton
         # [(fragmentId, fragment, frequency)]
         self.frag_frequency=[]
+        self.max_frag_frequency=[]
         for frag_id in range(max_len):
             # store the frequency of each kind of fragment(residue) in one colum
             frequency_list={}   
@@ -140,21 +141,23 @@ class sequenceSet(object):
                     continue
             # find out the fragment that has largest frequency in each column
             # and add them to the result
+
             m = max(frequency_list.values())
+            self.frag_frequency.append(frequency_list)
             for (frag, frequency) in frequency_list.items():
                 if frequency == m:
-                    self.frag_frequency.append((frag_id,frag, frequency))
+                    self.max_frag_frequency.append((frag_id,frag, frequency))
 
     def sort_by_frag_frequency(self):
         """
         sort sequences by the frag_frequency, a larger fragment frequency has a big weight
         """
         # find out the largest frequency and convert it to float type
-        largest =  max(self.frag_frequency, key=lambda f:f[2])[2] * 1.0
+        largest =  max(self.max_frag_frequency, key=lambda f:f[2])[2] * 1.0
         for seq in self.__sequence:
             for frag_id in range(len(seq)):
-                if seq[frag_id] == self.frag_frequency[frag_id][1]:
-                    seq.weight +=(self.frag_frequency[frag_id][2]/largest)
+                if seq[frag_id] == self.max_frag_frequency[frag_id][1]:
+                    seq.weight +=(self.max_frag_frequency[frag_id][2]/largest)
         # sort the sequence
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
 

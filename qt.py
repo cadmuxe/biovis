@@ -18,6 +18,7 @@ from SPaintWidget import *
 
 from GLPropertyBrowser import *
 from sequenceSet import sequenceSet
+from barcharWidget import barcharWidget
 
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
@@ -160,6 +161,7 @@ class MainWindow(QtGui.QMainWindow):
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
+        self.barchar = barcharWidget(self.centralWidget)
 
         self.dTIMLabel = QtGui.QLabel("dTIM")
         self.scTIMlabel = QtGui.QLabel("scTIM")
@@ -174,6 +176,7 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.addWidget(self.scTIMList, 1, 3, 1, 1)
 
         self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 4)
+        self.gridlayout.addWidget(self.barchar, 3, 0, 1, 4)
 
         self.gridlayout.setColumnStretch(0,20)
         self.gridlayout.setColumnStretch(1,20)
@@ -181,8 +184,9 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.setColumnStretch(3,1)
 
         self.gridlayout.setRowStretch(0,0)
-        self.gridlayout.setRowStretch(1,2)
-        self.gridlayout.setRowStretch(2,1)
+        self.gridlayout.setRowStretch(1,4)
+        self.gridlayout.setRowStretch(2,3)
+        self.gridlayout.setRowStretch(3,1)
 
         self.setCentralWidget(self.centralWidget)
 
@@ -190,6 +194,8 @@ class MainWindow(QtGui.QMainWindow):
         self.initMenus()
         self.initListWidget()
         self.initTIMs()
+        self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
+        self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
                 
     def initActions(self):
         self.exitAction = QtGui.QAction('Quit', self)
@@ -259,6 +265,17 @@ class MainWindow(QtGui.QMainWindow):
 
     def close(self):
         QtGui.qApp.quit()
+
+    def barchar_update(self, selection_f, selection_t, seqid, fragid):
+        seq = self.__sequenceSet[seqid].seq
+        frag_from, frag_to = selection_f, selection_t
+        if frag_to > len(seq):
+            frag_to = len(seq)
+        if frag_from > len(seq):
+            frag_from = len(seq)
+        frequency = [self.__sequenceSet.frag_frequency[i][seq[i]]/float(len(self.__sequenceSet)) if seq[i] !='-' else 0.0   for i in range(frag_from, frag_to)]
+        self.barchar.update_sequences(frag_from, frag_to, seq[frag_from: frag_to],
+                                      frequency)
 
 app = QtGui.QApplication(sys.argv)
 
