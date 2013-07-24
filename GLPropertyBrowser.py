@@ -1,14 +1,6 @@
 import sys
 from PySide import QtCore, QtGui
 
-# import pygtk
-# pygtk.require("2.0")
-# 
-# import gobject
-# import gtk
-# import gtk.gtkgl
-
-
 ###############################################################################
 ### GLProperty Browser Components for browsing and changing GLViewer.GLObject
 ### properties

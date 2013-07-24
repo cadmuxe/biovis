@@ -19,17 +19,19 @@ from SPaintWidget import *
 from GLPropertyBrowser import *
 from sequenceSet import sequenceSet
 
+# Class that handles the mouse event filters 
+# to link the views
+
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
         
         self.parent = parent
         self.glstruct = None
-        
-        QtOpenGL.QGLWidget.__init__(self, self.parent)
-        self.opengl_driver = OpenGLDriver.OpenGLDriver()
-        OpenGL.ERROR_CHECKING = False
                 
-        self.__key = None
+        QtOpenGL.QGLWidget.__init__(self, self.parent)
+        
+        self.opengl_driver = OpenGLDriver.OpenGLDriver()
+                
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         
         Viewer.GLViewer.__init__(self)
@@ -55,10 +57,10 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
                 
         self.glstruct = self.glv_add_struct(struct)
         
-        self.prop_editor = GLPropertyBrowserDialog(
-            glo_root      = self.glstruct )
-        
-        self.prop_editor.show()
+        # self.prop_editor = GLPropertyBrowserDialog(
+        #     glo_root      = self.glstruct )
+        # 
+        # self.prop_editor.show()
         
         return struct
     
@@ -78,39 +80,9 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.glv_render()
 
     def glv_render(self):
-           
-        # def print_recurse(gl_obj):
-        #     
-        #     for prop in gl_obj.glo_iter_property_desc():
-        #         if prop['name'][0:3] == "cpk":
-        #             print prop['name']
-        #             print prop.keys()
-        #             print " "
-        #             print prop.values()
-        #             print " "
-        #     
-        #     for child in gl_obj.glo_iter_children():
-        #         print_recurse(child)
-        # 
-        # if self.glstruct is not None:        
-        #     print_recurse(self.glstruct)
-                
+                    
         self.glv_render_one(self.opengl_driver)
         glFlush()
-
-    def mousePressEvent(self,event):
-        self.cursor_pre_x = event.x()
-        self.cursor_pre_y = event.y()
-        self.cursor_button = event.button()
-
-    def mouseMoveEvent(self,event):
-        if self.cursor_button == QtCore.Qt.RightButton or \
-                    (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
-            self.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
-        elif self.cursor_button == QtCore.Qt.LeftButton:
-            self.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-        self.cursor_pre_x = event.x()
-        self.cursor_pre_y = event.y()
 
     def wheelEvent(self, event):
         self.glv_zoom(event.delta())
@@ -142,9 +114,43 @@ class ListWidgetItem(QtGui.QListWidgetItem):
     def get_fragment_id(self):
         return self.frag_id
 
+class MouseEventFilter(QtCore.QObject):
+
+    pressed  = QtCore.Signal(QtCore.QEvent)
+    moved    = QtCore.Signal(QtCore.QEvent)
+
+    def __init__(self):
+        super(MouseEventFilter, self).__init__()
+        self.press = 0
+
+    def hit(self):
+        self.press = 1
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.MouseButtonPress:
+            if event.button() == QtCore.Qt.LeftButton:
+                self.pressed.emit(event)
+
+                if self.press:
+                    return 1
+                else:
+                    self.hit()
+
+        elif event.type() == QtCore.QEvent.MouseMove:
+            if self.press:
+                self.moved.emit(event)
+                return 1
+        elif event.type() == QtCore.QEvent.MouseButtonRelease:
+            if self.press:
+                self.press = 0
+                return 1
+
+        return super(MouseEventFilter,self).eventFilter(obj, event)
 
 class MainWindow(QtGui.QMainWindow):
-
+    
+    __key = None
+    
     def __init__(self):
         QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
@@ -156,7 +162,7 @@ class MainWindow(QtGui.QMainWindow):
         
         self.glWidgetSC = GLWidget(self.centralWidget)
         self.glWidgetD = GLWidget(self.centralWidget)
-                
+                        
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
@@ -174,7 +180,7 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.addWidget(self.scTIMList, 1, 3, 1, 1)
 
         self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 4)
-
+        
         self.gridlayout.setColumnStretch(0,20)
         self.gridlayout.setColumnStretch(1,20)
         self.gridlayout.setColumnStretch(2,1)
@@ -185,12 +191,48 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.setRowStretch(2,1)
 
         self.setCentralWidget(self.centralWidget)
-
+        
+        # create the mouse event filter
+        self.mouseEF = MouseEventFilter()
+        
+        # link it to each widgets mouse events
+        self.mouseEF.pressed.connect(self.pressEvent)
+        self.mouseEF.moved.connect(self.moveEvent)
+        
+        # install the new event filter
+        self.glWidgetSC.installEventFilter(self.mouseEF)
+        self.glWidgetD.installEventFilter(self.mouseEF)
+        
         self.initActions()
         self.initMenus()
         self.initListWidget()
         self.initTIMs()
+    
+    # mouse actions
+    def pressEvent(self, event):
                 
+        self.cursor_pre_x = event.x()
+        self.cursor_pre_y = event.y()
+        self.cursor_button = event.button()
+
+    def moveEvent(self, event):
+
+        if self.cursor_button == QtCore.Qt.RightButton or \
+                    (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
+            self.glWidgetSC.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
+            self.glWidgetD.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
+        
+        elif self.cursor_button == QtCore.Qt.LeftButton:
+            self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+            self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+        
+            self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+            self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+            
+        
+        self.cursor_pre_x = event.x()
+        self.cursor_pre_y = event.y()
+                              
     def initActions(self):
         self.exitAction = QtGui.QAction('Quit', self)
         self.exitAction.setShortcut('Ctrl+Q')
