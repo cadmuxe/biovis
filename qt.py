@@ -84,12 +84,6 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.glv_render_one(self.opengl_driver)
         glFlush()
 
-    def wheelEvent(self, event):
-        self.glv_zoom(event.delta())
-    def keyPressEvent(self,event):
-        self.__key = event.key()
-    def keyReleaseEvent(self,event):
-        self.__key = None
     def glv_redraw(self):
         self.updateGL()
         #print "redraw"
@@ -118,7 +112,8 @@ class MouseEventFilter(QtCore.QObject):
 
     pressed  = QtCore.Signal(QtCore.QEvent)
     moved    = QtCore.Signal(QtCore.QEvent)
-
+    wheeled  = QtCore.Signal(QtCore.QEvent)
+    
     def __init__(self):
         super(MouseEventFilter, self).__init__()
         self.press = 0
@@ -127,6 +122,7 @@ class MouseEventFilter(QtCore.QObject):
         self.press = 1
 
     def eventFilter(self, obj, event):
+        
         if event.type() == QtCore.QEvent.MouseButtonPress:
             if event.button() == QtCore.Qt.LeftButton:
                 self.pressed.emit(event)
@@ -135,7 +131,10 @@ class MouseEventFilter(QtCore.QObject):
                     return 1
                 else:
                     self.hit()
-
+        
+        elif event.type() == QtCore.QEvent.Wheel:
+            self.wheeled.emit(event)
+            
         elif event.type() == QtCore.QEvent.MouseMove:
             if self.press:
                 self.moved.emit(event)
@@ -198,6 +197,7 @@ class MainWindow(QtGui.QMainWindow):
         # link it to each widgets mouse events
         self.mouseEF.pressed.connect(self.pressEvent)
         self.mouseEF.moved.connect(self.moveEvent)
+        self.mouseEF.wheeled.connect(self.wheelEvent)
         
         # install the new event filter
         self.glWidgetSC.installEventFilter(self.mouseEF)
@@ -223,16 +223,30 @@ class MainWindow(QtGui.QMainWindow):
             self.glWidgetD.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
         
         elif self.cursor_button == QtCore.Qt.LeftButton:
+            
             self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
             self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
         
             self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
             self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
             
-        
         self.cursor_pre_x = event.x()
         self.cursor_pre_y = event.y()
-                              
+    
+    def wheelEvent(self, event):
+        self.glWidgetSC.glv_zoom(event.delta())
+        self.glWidgetD.glv_zoom(event.delta())
+        
+    # keyboard actions
+        
+    def keyPressEvent(self,event):
+        self.__key = event.key()
+        
+    def keyReleaseEvent(self,event):
+        self.__key = None
+    
+    # window actions    
+                                  
     def initActions(self):
         self.exitAction = QtGui.QAction('Quit', self)
         self.exitAction.setShortcut('Ctrl+Q')
