@@ -1,163 +1,75 @@
 #!/usr/bin/env python -W ignore::DeprecationWarning
-
 import sys
-# from PySide import QtCore, QtGui, QtOpenGL
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from PyQt4.QtOpenGL import *
-
-import OpenGL
-
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
-
-from mmLib import FileIO, Structure, Viewer, OpenGLDriver
-from SPaintWidget import *
-
-from GLPropertyBrowser import *
+from vis import * # includes QT and openGL imports
 from sequenceSet import sequenceSet
 from barcharWidget import barcharWidget
 
-class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
-    def __init__(self, parent=None):
-        
-        self.parent = parent
-        self.glstruct = None
-        
-        QtOpenGL.QGLWidget.__init__(self, self.parent)
-        self.opengl_driver = OpenGLDriver.OpenGLDriver()
-        OpenGL.ERROR_CHECKING = False
-                
-        self.__key = None
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        
-        Viewer.GLViewer.__init__(self)
-        self.load_struct()
-                    
-    def load_struct(self, path = None):
-        
-        path = "./data/scTIM.pdb"
-        
-        try:
-            struct = FileIO.LoadStructure(
-                fil              = path,
-                library_bonds    = True,
-                distance_bonds   = True )
-        
-        except IOError:
-            error( "file not found: %s" % (path) )
-            return None
+# Class that handles the mouse event filters 
+# to link the views
+class MyEventFilter(QtCore.QObject):
 
-        struct_desc = {}
-        struct_desc["struct"] = struct
-        struct_desc["path"] = path
-                
-        self.glstruct = self.glv_add_struct(struct)
-        
-        self.prop_editor = GLPropertyBrowserDialog(
-            glo_root      = self.glstruct )
-        
-        self.prop_editor.show()
-        
-        return struct
+    # mouse press event
+    pressed  = QtCore.Signal(QtCore.QEvent)
+    # mouse move event
+    moved    = QtCore.Signal(QtCore.QEvent)
+    # mouse wheel event
+    wheeled  = QtCore.Signal(QtCore.QEvent)
+    # context menu event
+    context = QtCore.Signal(Viewer.GLViewer, QtCore.QPoint)
     
-    def getStruct(self):
-        return self.glstruct
-        
-    def initializeGL(self):
-        #glutInit(sys.argv)
-        
-        self.glv_init()
+    def __init__(self):
+        super(MyEventFilter, self).__init__()
+        self.press = 0
 
-    def resizeGL(self, width, height):
-        self.glv_resize(width, height)
+    def hit(self):
+        self.press = 1
 
-    def paintGL(self):
+    def eventFilter(self, obj, event):
+        
+        if event.type() == QtCore.QEvent.MouseButtonPress:
+            if event.button() == QtCore.Qt.LeftButton:
+                self.pressed.emit(event)
+
+                if self.press:
+                    return 1
+                else:
+                    self.hit()
+        
+        elif event.type() == QtCore.QEvent.Wheel:
+            self.wheeled.emit(event)
+            return 1
+        elif event.type() == QtCore.QEvent.MouseMove:
+            if self.press:
+                self.moved.emit(event)
+                return 1
+        elif event.type() == QtCore.QEvent.MouseButtonRelease:
+            if self.press:
+                self.press = 0
+                return 1
+        elif event.type() == QtCore.QEvent.ContextMenu:
+            self.context.emit(obj, QtGui.QCursor.pos())
+            return 1
             
-        self.glv_render()
-
-    def glv_render(self):
-           
-        # def print_recurse(gl_obj):
-        #     
-        #     for prop in gl_obj.glo_iter_property_desc():
-        #         if prop['name'][0:3] == "cpk":
-        #             print prop['name']
-        #             print prop.keys()
-        #             print " "
-        #             print prop.values()
-        #             print " "
-        #     
-        #     for child in gl_obj.glo_iter_children():
-        #         print_recurse(child)
-        # 
-        # if self.glstruct is not None:        
-        #     print_recurse(self.glstruct)
-                
-        self.glv_render_one(self.opengl_driver)
-        glFlush()
-
-    def mousePressEvent(self,event):
-        self.cursor_pre_x = event.x()
-        self.cursor_pre_y = event.y()
-        self.cursor_button = event.button()
-
-    def mouseMoveEvent(self,event):
-        if self.cursor_button == QtCore.Qt.RightButton or \
-                    (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
-            self.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
-        elif self.cursor_button == QtCore.Qt.LeftButton:
-            self.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-        self.cursor_pre_x = event.x()
-        self.cursor_pre_y = event.y()
-
-    def wheelEvent(self, event):
-        self.glv_zoom(event.delta())
-    def keyPressEvent(self,event):
-        self.__key = event.key()
-    def keyReleaseEvent(self,event):
-        self.__key = None
-    def glv_redraw(self):
-        self.updateGL()
-        #print "redraw"
-        # why need to use updateGL, but glv_render() not works.
-        # Answer: update Tells QT to refresh the widget
-    def update_select(self, fragment_id_list=[]):
-        #print "update_select"
-        self.update_fragment_id_list(fragment_id_list)
-        self.glv_redraw()
-
-class ListWidget(QtGui.QListWidget):
-    def __init__(self,text, parent = None):
-        QtGui.QListWidget.__init__(self, parent)
-        self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
-
-class ListWidgetItem(QtGui.QListWidgetItem):
-    def __init__(self, text , parent, frag_id=None):
-        QtGui.QListWidgetItem.__init__(self, text, parent)
-        self.frag_name = text
-        self.frag_id = frag_id
-        self.__callback = {}
-    def get_fragment_id(self):
-        return self.frag_id
-
+        return super(MyEventFilter,self).eventFilter(obj, event)
 
 class MainWindow(QtGui.QMainWindow):
-
+    
+    __key = None
+    
     def __init__(self):
         QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
         self.setWindowTitle("2013 BioVis Contest")
-        self.resize(1280, 1024)
-
+        #self.resize(1280, 1024)
+        self.resize(640, 512)
+        
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
         self.glWidgetSC = GLWidget(self.centralWidget)
         self.glWidgetD = GLWidget(self.centralWidget)
-                
+                        
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
@@ -178,6 +90,7 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 4)
         self.gridlayout.addWidget(self.barchar, 3, 0, 1, 4)
 
+        
         self.gridlayout.setColumnStretch(0,20)
         self.gridlayout.setColumnStretch(1,20)
         self.gridlayout.setColumnStretch(2,1)
@@ -189,14 +102,107 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.setRowStretch(3,1)
 
         self.setCentralWidget(self.centralWidget)
-
+        
+        # create the event filter
+        self.myEF =MyEventFilter()
+         
+        # link  to each widgets mouse events
+        self.myEF.pressed.connect(self.pressEvent)
+        self.myEF.moved.connect(self.moveEvent)
+        self.myEF.wheeled.connect(self.myWheelEvent)
+        
+        # link event filter to context menu
+        self.glWidgetSC.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.glWidgetD.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.myEF.context.connect(self.on_context_menu)
+        
+        # install the new event filter
+        self.glWidgetSC.installEventFilter(self.myEF)
+        self.glWidgetD.installEventFilter(self.myEF)
+        
         self.initActions()
         self.initMenus()
         self.initListWidget()
         self.initTIMs()
         self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
+    
+    def ready(self):
+        # ready to render
+        self.glWidgetSC.setStatus()
+        self.glWidgetD.setStatus()
+    
+    def on_context_menu(self, obj, point):
                 
+        # create context menu content
+        self.popMenu = QtGui.QMenu(self)
+        options = QtGui.QAction('Rendering Options', self)
+        options.triggered.connect( self.on_item_clicked ) 
+        self.popMenu.addAction(options)
+        # self.popMenu.addSeparator()
+        
+        self.me = obj
+        
+        # show context menu
+        self.popMenu.exec_(point)
+        
+        return
+    
+    # when an item in the menu is clicked
+    def on_item_clicked(self):
+        
+        self.me.showEditor()
+        
+        return
+        
+    # mouse actions
+    def pressEvent(self, event):
+                
+        self.cursor_pre_x = event.x()
+        self.cursor_pre_y = event.y()
+        self.cursor_button = event.button()
+
+    def moveEvent(self, event):
+        
+        # why the fuck is this even a thing!?
+        if type(event) == QtGui.QMoveEvent:
+            return
+                
+        if self.cursor_button == QtCore.Qt.RightButton or \
+                    (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
+            self.glWidgetSC.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
+            self.glWidgetD.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
+        
+        elif self.cursor_button == QtCore.Qt.LeftButton:
+            
+            self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+            self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+        
+            self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+            self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
+            
+        self.cursor_pre_x = event.x()
+        self.cursor_pre_y = event.y()
+    
+    def myWheelEvent(self, event):
+        
+     # why the fuck is this even a thing!?
+        if type(event) == QtGui.QMoveEvent:
+            return
+            
+        self.glWidgetSC.glv_zoom(event.delta())
+        self.glWidgetD.glv_zoom(event.delta())
+        
+    # keyboard actions
+        
+    def keyPressEvent(self,event):
+        self.__key = event.key()
+        
+    def keyReleaseEvent(self,event):
+        self.__key = None
+    
+    # window actions    
+                                  
     def initActions(self):
         self.exitAction = QtGui.QAction('Quit', self)
         self.exitAction.setShortcut('Ctrl+Q')
@@ -280,7 +286,8 @@ class MainWindow(QtGui.QMainWindow):
 app = QtGui.QApplication(sys.argv)
 
 win = MainWindow()
-
 win.show()
+
+win.ready()
 
 sys.exit(app.exec_())
