@@ -26,6 +26,9 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         
         Viewer.GLViewer.__init__(self)
+        
+        gluPerspective(45.0, self.width()/self.height(), 0.0001, 1000)
+        
         self.load_struct()
                     
     def load_struct(self, path = None):
