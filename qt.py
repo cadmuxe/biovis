@@ -161,9 +161,9 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralWidget)
 
         self.initActions()
-        self.initMenus()
         self.initListWidget()
         self.initTIMs()
+        self.initMenus()
         self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
                 
@@ -195,7 +195,78 @@ class MainWindow(QtGui.QMainWindow):
     def initMenus(self):
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
-        fileMenu.addAction(self.exitAction)
+
+        sortingMenu = menuBar.addMenu("&Sorting")
+        action_frequency = sortingMenu.addAction("&Residue frequency")
+        action_edit_dist = sortingMenu.addAction("&Edit distance")
+        action_weighted_edit_dist = sortingMenu.addAction("&Weighted edit distance")
+        action_common_resi_with_scTIM = sortingMenu.addAction("&Common residues with scTIM")
+        action_normalized_common_resi_with_scTIM = sortingMenu.addAction("&Common residues with scTIM(Normalized)")
+        action_number_common_resi_with_scTIM_without_posi = sortingMenu.addAction("&Common resi. with scTIM without position")
+        action_percent_common_resi_with_scTIM_without_posi = sortingMenu.addAction("&Common resi. with scTIM without position%")
+
+        self.connect(action_frequency, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(0))
+        self.connect(action_edit_dist, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(1))
+        self.connect(action_weighted_edit_dist, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(2))
+        self.connect(action_common_resi_with_scTIM , QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(3))
+        self.connect(action_normalized_common_resi_with_scTIM , QtCore.SIGNAL("triggered()"),
+                     lambda: self.set_sorting(4))
+        self.connect(action_number_common_resi_with_scTIM_without_posi, QtCore.SIGNAL("triggered()"),
+                     lambda: self.set_sorting(5))
+        self.connect(action_percent_common_resi_with_scTIM_without_posi , QtCore.SIGNAL("triggered()"),
+                     lambda: self.set_sorting(6))
+
+        coloringMenu = menuBar.addMenu("&Coloring")
+        action_basic_coloring = coloringMenu.addAction("&Basic coloring")
+        action_frequency_color = coloringMenu.addAction("&Frequency Coloring")
+
+        self.connect(action_basic_coloring, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(0))
+        self.connect(action_frequency_color, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(1))
+
+        self.setMenuBar(menuBar)
+
+    def set_sorting(self, n):
+        if n == 0:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_frag_frequency
+            self.current_sortting["name"] = "Residues frequency"
+        elif n == 1:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_edit_dist
+            self.current_sortting["name"] = "Edit distance"
+        elif n == 2:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_weighted_edit_dist
+            self.current_sortting["name"] = "Weighted edit distance"
+        elif n == 3:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_num_of_common_residues_with_scTIM
+            self.current_sortting["name"] = "Common residues with scTIM"
+        elif n == 4:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_num_of_common_residues_with_scTIM_norm
+            self.current_sortting["name"] = "Common residues with scTIM(Normalized)"
+        elif n == 5:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_number_of_common_residues_with_scTIM_without_position
+            self.current_sortting["name"] = "Common residues number with scTIM without consider the position"
+        elif n == 6:
+            self.current_sortting["func"] = self.__sequenceSet.sort_by_percent_of_common_residues_with_scTIM_without_position
+            self.current_sortting["name"] = "Common residues percentage with scTIM without consider the position"
+        self.current_sortting["func"]()
+        self.current_coloring["func"]()
+        self.updateStatusBar()
+        self.__sequenceSet.updateColor(self.TIMs)
+
+
+    def set_coloring(self, n):
+        if n == 0:
+            self.current_coloring["func"] = self.__sequenceSet.basicColor
+            self.current_coloring["name"] = "Basic coloring(residues are colored by gray)"
+        elif n == 1:
+            self.current_coloring["func"] = self.__sequenceSet.frequencyColor
+            self.current_coloring["name"] = "Frequency coloring(most frequency residue in same column colored by red)"
+
+        self.current_coloring["func"]()
+        self.updateStatusBar()
+        self.__sequenceSet.updateColor(self.TIMs)
+
+    def updateStatusBar(self):
+        self.statusBar().showMessage("Sorting by %s, Coloring by %s "  % (self.current_sortting["name"], self.current_coloring["name"]))
 
     # Create the lists in the right panel
     def initTIMs(self):
@@ -230,8 +301,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # load TIMs, and coloring them and update for darwing
         self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa")
-        self.__sequenceSet.frequencyColor()                 # could use other coloring method
+        self.__sequenceSet.loadscTIMFromFile("data/scTIM.fa")
+        self.current_sortting={"func":"", "name":"Haven't been sorted"}
+        self.current_coloring ={"func":self.__sequenceSet.basicColor, "name":"Basic coloring"}
+        self.__sequenceSet.basicColor()                 # could use other coloring method
         self.__sequenceSet.updateColor(self.TIMs)
+        self.updateStatusBar()
 
     def close(self):
         QtGui.qApp.quit()

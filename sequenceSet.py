@@ -90,8 +90,8 @@ class sequenceSet(object):
         are colored with red for other fragment, if the adjacent fragment(in the column) 
         are same, they will be colored in same color
         """
-        self.calculate_frag_frequency()
-        self.sort_by_frag_frequency()
+        if not hasattr(self, "frag_frequency"):
+            self.calculate_frag_frequency()
         # initialize __color to store result
         self.__color = [[] for i in range(len(self.__sequence))]
         pre_frag = ''
@@ -153,6 +153,8 @@ class sequenceSet(object):
         sort sequences by the frag_frequency, a larger fragment frequency has a big weight
         """
         # find out the largest frequency and convert it to float type
+        if not hasattr(self, "max_frag_frequency"):
+            self.calculate_frag_frequency()
         largest =  max(self.max_frag_frequency, key=lambda f:f[2])[2] * 1.0
         for seq in self.__sequence:
             for frag_id in range(len(seq)):
