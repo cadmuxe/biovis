@@ -10,12 +10,14 @@ from OpenGL.GLUT import *
 
 from mmLib import FileIO, Structure, Viewer, OpenGLDriver
 from SPaintWidget import *
+from GLPropertyBrowser import *
 
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
     def __init__(self, parent=None):
         
         self.parent = parent
         self.glstruct = None
+        self.ready = False
                 
         QtOpenGL.QGLWidget.__init__(self, self.parent)
         
@@ -46,15 +48,20 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
                 
         self.glstruct = self.glv_add_struct(struct)
         
-        # self.prop_editor = GLPropertyBrowserDialog(
-        #     glo_root      = self.glstruct )
-        # 
-        # self.prop_editor.show()
-        
+        self.prop_editor = GLPropertyBrowserDialog(
+            glo_root      = self.glstruct )
+                    
         return struct
+    
+    def setStatus(self):
+        self.ready = True
     
     def getStruct(self):
         return self.glstruct
+    
+    # show property 
+    def showEditor(self):
+        self.prop_editor.show()
         
     def initializeGL(self):
         #glutInit(sys.argv)
@@ -65,7 +72,10 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.glv_resize(width, height)
 
     def paintGL(self):
-            
+        
+        if not self.ready:
+            return 1
+        
         self.glv_render()
 
     def glv_render(self):

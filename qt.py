@@ -2,19 +2,23 @@
 import sys
 
 from vis import * # includes QT and openGL imports
-from GLPropertyBrowser import *
 from sequenceSet import sequenceSet
 
 # Class that handles the mouse event filters 
 # to link the views
-class MouseEventFilter(QtCore.QObject):
+class MyEventFilter(QtCore.QObject):
 
+    # mouse press event
     pressed  = QtCore.Signal(QtCore.QEvent)
+    # mouse move event
     moved    = QtCore.Signal(QtCore.QEvent)
+    # mouse wheel event
     wheeled  = QtCore.Signal(QtCore.QEvent)
+    # context menu event
+    context = QtCore.Signal(Viewer.GLViewer, QtCore.QPoint)
     
     def __init__(self):
-        super(MouseEventFilter, self).__init__()
+        super(MyEventFilter, self).__init__()
         self.press = 0
 
     def hit(self):
@@ -33,7 +37,7 @@ class MouseEventFilter(QtCore.QObject):
         
         elif event.type() == QtCore.QEvent.Wheel:
             self.wheeled.emit(event)
-            
+            return 1
         elif event.type() == QtCore.QEvent.MouseMove:
             if self.press:
                 self.moved.emit(event)
@@ -42,8 +46,11 @@ class MouseEventFilter(QtCore.QObject):
             if self.press:
                 self.press = 0
                 return 1
-
-        return super(MouseEventFilter,self).eventFilter(obj, event)
+        elif event.type() == QtCore.QEvent.ContextMenu:
+            self.context.emit(obj, QtGui.QCursor.pos())
+            return 1
+            
+        return super(MyEventFilter,self).eventFilter(obj, event)
 
 class MainWindow(QtGui.QMainWindow):
     
@@ -53,8 +60,9 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
         self.setWindowTitle("2013 BioVis Contest")
-        self.resize(1280, 1024)
-
+        #self.resize(1280, 1024)
+        self.resize(640, 512)
+        
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
@@ -90,23 +98,56 @@ class MainWindow(QtGui.QMainWindow):
 
         self.setCentralWidget(self.centralWidget)
         
-        # create the mouse event filter
-        self.mouseEF = MouseEventFilter()
+        # create the event filter
+        self.myEF =MyEventFilter()
+         
+        # link  to each widgets mouse events
+        self.myEF.pressed.connect(self.pressEvent)
+        self.myEF.moved.connect(self.moveEvent)
+        self.myEF.wheeled.connect(self.myWheelEvent)
         
-        # link it to each widgets mouse events
-        self.mouseEF.pressed.connect(self.pressEvent)
-        self.mouseEF.moved.connect(self.moveEvent)
-        self.mouseEF.wheeled.connect(self.wheelEvent)
+        # link event filter to context menu
+        self.glWidgetSC.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.glWidgetD.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.myEF.context.connect(self.on_context_menu)
         
         # install the new event filter
-        self.glWidgetSC.installEventFilter(self.mouseEF)
-        self.glWidgetD.installEventFilter(self.mouseEF)
+        self.glWidgetSC.installEventFilter(self.myEF)
+        self.glWidgetD.installEventFilter(self.myEF)
         
         self.initActions()
         self.initMenus()
         self.initListWidget()
         self.initTIMs()
     
+    def ready(self):
+        # ready to render
+        self.glWidgetSC.setStatus()
+        self.glWidgetD.setStatus()
+    
+    def on_context_menu(self, obj, point):
+                
+        # create context menu content
+        self.popMenu = QtGui.QMenu(self)
+        options = QtGui.QAction('Rendering Options', self)
+        options.triggered.connect( self.on_item_clicked ) 
+        self.popMenu.addAction(options)
+        # self.popMenu.addSeparator()
+        
+        self.me = obj
+        
+        # show context menu
+        self.popMenu.exec_(point)
+        
+        return
+    
+    # when an item in the menu is clicked
+    def on_item_clicked(self):
+        
+        self.me.showEditor()
+        
+        return
+        
     # mouse actions
     def pressEvent(self, event):
                 
@@ -115,7 +156,11 @@ class MainWindow(QtGui.QMainWindow):
         self.cursor_button = event.button()
 
     def moveEvent(self, event):
-
+        
+        # why the fuck is this even a thing!?
+        if type(event) == QtGui.QMoveEvent:
+            return
+                
         if self.cursor_button == QtCore.Qt.RightButton or \
                     (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
             self.glWidgetSC.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
@@ -132,7 +177,12 @@ class MainWindow(QtGui.QMainWindow):
         self.cursor_pre_x = event.x()
         self.cursor_pre_y = event.y()
     
-    def wheelEvent(self, event):
+    def myWheelEvent(self, event):
+        
+     # why the fuck is this even a thing!?
+        if type(event) == QtGui.QMoveEvent:
+            return
+            
         self.glWidgetSC.glv_zoom(event.delta())
         self.glWidgetD.glv_zoom(event.delta())
         
@@ -218,7 +268,8 @@ class MainWindow(QtGui.QMainWindow):
 app = QtGui.QApplication(sys.argv)
 
 win = MainWindow()
-
 win.show()
+
+win.ready()
 
 sys.exit(app.exec_())
