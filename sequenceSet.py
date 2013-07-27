@@ -49,6 +49,7 @@ class sequenceSet(object):
         for x in range(len(lines)):
             if lines[x][0] == '>':
                 self.__sequence.append(sequence(lines[x][1:], lines[x+1]))
+        self.calculate_frag_frequency()
     def loadscTIMFromFile(self, filename):
         f = open(filename)
         self.__scTIM = sequence("scTIM",f.readline().strip())
