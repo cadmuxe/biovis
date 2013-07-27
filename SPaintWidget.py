@@ -67,7 +67,7 @@ class MyPaintWidget(QtGui.QWidget):
 
         # used for scaling, let the TIMs image become a little small, so that have enough space for scrollbar
         self.__TIMs_cache_height = self.__TIMs_cache.size().height()
-        self.__TIMs_cache_width = self.__TIMs_cache.size().width() - self.__scrollbar_width
+        self.__TIMs_cache_width = self.__widget_width - self.__scrollbar_width
 
         # scrollbar is a thumbnail of TIMs image.
         self.__TIMs_cache_scrollbar = self.__TIMs_cache.scaled(self.__scrollbar_width,self.__scrollbar_height)
@@ -87,7 +87,7 @@ class MyPaintWidget(QtGui.QWidget):
 
         # cache the result (TIMs image)
         if self.__TIMs_redraw:
-            self.__TIMs_cache = QtGui.QPixmap(event.rect().width(), self.sequences["len"]*self.paint_frag_heigh)
+            self.__TIMs_cache = QtGui.QPixmap(self.paint_frag_width * self.sequences["max_len_frag"], self.sequences["len"]*self.paint_frag_heigh)
             self.__TIMs_cache.fill(QtCore.Qt.white)
             painter = QtGui.QPainter(self.__TIMs_cache)
             #painter.begin(self.__TIMs_cache)
@@ -146,7 +146,7 @@ class MyPaintWidget(QtGui.QWidget):
         # draw a rectangle on current mouse position
         if self.on_sequences_id != None:
             painter.setPen(QtCore.Qt.NoPen)
-            selection = QtGui.QPixmap(self.__widget_width, 10)
+            selection = QtGui.QPixmap(self.paint_frag_width * self.sequences["max_len_frag"], 10)
             selection.fill(QtCore.Qt.white)
             painter_s = QtGui.QPainter(selection)
             painter_s.setPen(QtCore.Qt.NoPen)
@@ -164,13 +164,28 @@ class MyPaintWidget(QtGui.QWidget):
         painter.end()
 
     def mousePressEvent(self,event):
+        x,y = event.x(),event.y()
         self.cursor_pre_x = event.x()
         self.cursor_pre_y = event.y()
         self.cursor_button = event.button()
+        if self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
+            if (self.__TIMs_cache_width - self.__scrollabr_button_width_hor) * self.__scroll_button_position_hor < x \
+                        < ((self.__TIMs_cache_width - self.__scrollabr_button_width_hor) * self.__scroll_button_position_hor + self.__scrollabr_button_width_hor) \
+                and x < self.__scrollbar_postion_x:
+                self.hit = "hor"
+            # sequences selection
+            else:
+                self.hit = "seq"
+            # sequence scrollbar
+            if (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position < y \
+                        < ((self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position + self.__scroll_button_height) and \
+                x > self.__scrollbar_postion_x:
+                self.hit ="scr"
 
     def mouseReleaseEvent(self,event):
         if self.cursor_button == event.button():
             self.cursor_button = QtCore.Qt.MouseButton.NoButton
+        self.hit = None
 
     def update_scroll(self,dy):
         self.__scroll_button_position +=dy
@@ -184,38 +199,43 @@ class MyPaintWidget(QtGui.QWidget):
             self.__scroll_button_position_hor = 0.0
         elif self.__scroll_button_position_hor > 1.0:
             self.__scroll_button_position_hor = 1.0
+        print self.__scroll_button_position_hor,self.sequences["max_len_frag"]
 
     def mouseMoveEvent(self,event):
         x,y = event.x(),event.y()
 
         if self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
+            # fragment selection
+            if self.hit == "hor":
+                d = (x-self.cursor_pre_x) * 1.0 / self.__TIMs_cache_width
+                self.update_scroll_hor(d)
             # sequences selection
-            if x < self.__scrollbar_postion_x:
+            elif self.hit == "seq":
                 self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__widget_height)* \
                                            self.__scroll_button_position) / self.paint_frag_heigh
-                self.on_frag_id = x / self.paint_frag_width
+                paint_frag_width = float(self.__TIMs_cache_width)/ self.sequences["max_len_frag"]
+                self.on_frag_id = int(x / paint_frag_width)
                 if self.on_sequences_id >= self.sequences["len"]:
                     self.on_sequences_id = self.sequences["len"] - 1
+                elif self.on_sequences_id < 0:
+                    self.on_sequences_id = 0
                 if self.on_frag_id >= len(self.sequences[self.on_sequences_id]):
                     self.on_frag_id = len(self.sequences[self.on_sequences_id]) -1
+                elif self.on_frag_id < 0:
+                    self.on_frag_id = 0
+                if self.__callback.has_key("seq_name"):
+                    self.__callback["seq_name"](self.sequenceData[self.on_sequences_id].name)
             # sequence scrollbar
-            if (self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position < y \
-                        < ((self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position + self.__scroll_button_height) and \
-                x > self.__scrollbar_postion_x:
-                d =  (y - self.cursor_pre_y) * 1.1 / self.__scrollbar_height
+            elif self.hit =="scr":
+                d =  (y - self.cursor_pre_y) * 1.0 / self.__scrollbar_height
                 self.update_scroll(d)
                 self.cursor_pre_x = x
                 self.cursor_pre_y = y
-            # fragment selection
-            if (self.__TIMs_cache_width - self.__scrollabr_button_width_hor) * self.__scroll_button_position_hor < x \
-                        < ((self.__TIMs_cache_width - self.__scrollabr_button_width_hor) * self.__scroll_button_position_hor + self.__scrollabr_button_width_hor):
-                d = (x-self.cursor_pre_x) * 1.1 / self.__TIMs_cache_width
-                self.update_scroll_hor(d)
             self.update()
         self.cursor_pre_x = x
         self.cursor_pre_y = y
-        self.__callback["barchar"](int(self.sequences["max_len_frag"]* self.__scroll_button_position_hor),
-                                    int(self.sequences["max_len_frag"]* self.__scroll_button_position_hor + self.__horizontal_selection_element_num),
+        self.__callback["barchar"](int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num)* self.__scroll_button_position_hor),
+                                    int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num)* self.__scroll_button_position_hor + self.__horizontal_selection_element_num),
                                    self.on_sequences_id,self.on_frag_id)
 
 
@@ -255,3 +275,6 @@ class MyPaintWidget(QtGui.QWidget):
         self.__callback[d["name"]] = d["func"]
     def resizeEvent(self, *args, **kwargs):
         self.__TIMs_redraw = True
+
+    def set_sequenceData(self,sequence):
+        self.sequenceData = sequence

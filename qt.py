@@ -126,7 +126,10 @@ class MainWindow(QtGui.QMainWindow):
         self.initMenus()
         self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
-    
+        def print_name(x):
+            print x
+        self.TIMs.registerClickCallBack({"name":"seq_name", "func":print_name})
+
     def ready(self):
         # ready to render
         self.glWidgetSC.setStatus()
@@ -343,6 +346,7 @@ class MainWindow(QtGui.QMainWindow):
         self.__sequenceSet.basicColor()                 # could use other coloring method
         self.__sequenceSet.updateColor(self.TIMs)
         self.updateStatusBar()
+        self.TIMs.set_sequenceData(self.__sequenceSet)
 
     def close(self):
         QtGui.qApp.quit()
