@@ -28,7 +28,31 @@
      <item>
       <layout class="QHBoxLayout" name="hbox">
        <item>
-        <widget class="QTreeView" name="treeView"/>
+        <widget class="QTabWidget" name="tabWidget_2">
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <widget class="QWidget" name="tab">
+          <attribute name="title">
+           <string>Tab 1</string>
+          </attribute>
+          <widget class="QTreeView" name="treeView">
+           <property name="geometry">
+            <rect>
+             <x>-10</x>
+             <y>0</y>
+             <width>341</width>
+             <height>370</height>
+            </rect>
+           </property>
+          </widget>
+         </widget>
+         <widget class="QWidget" name="tab_2">
+          <attribute name="title">
+           <string>Tab 2</string>
+          </attribute>
+         </widget>
+        </widget>
        </item>
        <item>
         <widget class="QTabWidget" name="tabWidget">
@@ -36,7 +60,6 @@
           <attribute name="title">
            <string>Tab 1</string>
           </attribute>
-          <zorder>horizontalLayoutWidget</zorder>
          </widget>
          <widget class="QWidget" name="tab_6">
           <attribute name="title">
