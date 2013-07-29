@@ -126,8 +126,9 @@ class MainWindow(QtGui.QMainWindow):
         self.initMenus()
         self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
-        def print_name(x):
-            print x
+        def print_name(name):
+            self.selected_sequence_name =  name
+            self.updateStatusBar()
         self.TIMs.registerClickCallBack({"name":"seq_name", "func":print_name})
 
     def ready(self):
@@ -257,10 +258,18 @@ class MainWindow(QtGui.QMainWindow):
 
         coloringMenu = menuBar.addMenu("&Coloring")
         action_basic_coloring = coloringMenu.addAction("&Basic coloring")
-        action_frequency_color = coloringMenu.addAction("&Frequency Coloring")
+        action_frequency_color = coloringMenu.addAction("&Frequency coloring")
+        action_general_chemical = coloringMenu.addAction("&General chemical coloring")
+        action_side_chain_polarity = coloringMenu.addAction("&Side-chain polarity coloring")
+        action_side_chain_charge = coloringMenu.addAction("&Side-chain charge coloring(pH7.4)")
+        action_side_chain_solvent = coloringMenu.addAction("&Side-chain polar solvent")
 
         self.connect(action_basic_coloring, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(0))
         self.connect(action_frequency_color, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(1))
+        self.connect(action_general_chemical, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(2))
+        self.connect(action_side_chain_polarity, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(3))
+        self.connect(action_side_chain_charge, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(4))
+        self.connect(action_side_chain_solvent, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(5))
 
         self.setMenuBar(menuBar)
 
@@ -299,13 +308,29 @@ class MainWindow(QtGui.QMainWindow):
         elif n == 1:
             self.current_coloring["func"] = self.__sequenceSet.frequencyColor
             self.current_coloring["name"] = "Frequency coloring(most frequency residue in same column colored by red)"
+        elif n == 2:
+            self.current_coloring["func"] = self.__sequenceSet.color_general_chemical
+            self.current_coloring["name"] = "Based on general chemical characteristics of their R groups"
+        elif n == 3:
+            self.current_coloring["func"] = self.__sequenceSet.color_side_chain_polarity
+            self.current_coloring["name"] = "Based on side-chain polarity"
+        elif n == 4:
+            self.current_coloring["func"] = self.__sequenceSet.color_side_chain_charge
+            self.current_coloring["name"] = "Based on side-chain charge(pH7.4)"
+        elif n == 5:
+            self.current_coloring["func"] = self.__sequenceSet.color_side_chain_solvent
+            self.current_coloring["name"] = "Based on the propensity of a side chain to be in contact with polar solvent like water"
 
         self.current_coloring["func"]()
         self.updateStatusBar()
         self.__sequenceSet.updateColor(self.TIMs)
 
     def updateStatusBar(self):
-        self.statusBar().showMessage("Sorting by %s, Coloring by %s "  % (self.current_sortting["name"], self.current_coloring["name"]))
+        if hasattr(self, 'selected_sequence_name'):
+            self.statusBar().showMessage("Selected sequence:%s, Sorting(%s), Coloring(%s) " % (self.selected_sequence_name,self.current_sortting["name"], self.current_coloring["name"]))
+        else:
+            self.statusBar().showMessage("Sorting(%s), Coloring(%s) " % (self.current_sortting["name"], self.current_coloring["name"]))
+
 
     # Create the lists in the right panel
     def initTIMs(self):

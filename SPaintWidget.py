@@ -15,6 +15,13 @@ class color(object):
     red4 = QtGui.QColor(220,118,160)
     red5 = QtGui.QColor(236,168,200)
 
+    c1 = QtGui.QColor(178, 24, 43)
+    c2 = QtGui.QColor(33, 102, 172)
+    c3 = QtGui.QColor(239, 138, 98)
+    c4 = QtGui.QColor(103, 169, 207)
+    c5 = QtGui.QColor(253, 219, 199)
+    c6 = QtGui.QColor(209, 229, 240)
+
     @staticmethod
     def  random(not_color):
         """

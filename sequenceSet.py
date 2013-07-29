@@ -95,20 +95,121 @@ class sequenceSet(object):
             self.calculate_frag_frequency()
         # initialize __color to store result
         self.__color = [[] for i in range(len(self.__sequence))]
-        pre_frag = ''
-        pre_color = None
         for frag_id in range(len(self.max_frag_frequency)):
             for seq_id in range( len(self.__sequence)):
                 try:
                     if self.__sequence[seq_id][frag_id] == '-':
-                        pre_color = color.gray
+                        fcolor = color.gray
                     elif self.__sequence[seq_id][frag_id] == self.max_frag_frequency[frag_id][1]:
                         # coloring the largest frequency fragment in the column
-                        pre_color = color.red       
-                    elif self.__sequence[seq_id][frag_id] != pre_frag:
-                        #if the previous fragment and the current is different, change a color
-                        pre_color = color.random(pre_color)
-                    self.__color[seq_id].append(pre_color)
+                        fcolor = color.red
+                    else:
+                        fcolor = color.black
+                    self.__color[seq_id].append(fcolor)
+                except IndexError:
+                    pass
+        return
+    def color_general_chemical(self):
+        # initialize __color to store result
+        self.__color = [[] for i in range(len(self.__sequence))]
+        for frag_id in range(len(self.max_frag_frequency)):
+            for seq_id in range( len(self.__sequence)):
+                try:
+                    if self.__sequence[seq_id][frag_id] == '-':
+                        fcolor = color.gray
+                    elif self.__sequence[seq_id][frag_id].upper() in ('G','A','V','L','I'):
+                        # Aliphatic
+                        fcolor = color.c1
+                    elif self.__sequence[seq_id][frag_id].upper() in ('S','C','T','M'):
+                        # HS
+                        fcolor = color.c2
+                    elif self.__sequence[seq_id][frag_id].upper() in ('P'):
+                        # Cyclic
+                        fcolor = color.c3
+                    elif self.__sequence[seq_id][frag_id].upper() in ('F','W','Y'):
+                        # Aromatic
+                        fcolor = color.c4
+                    elif self.__sequence[seq_id][frag_id].upper() in ('H','K','R'):
+                        # Basic
+                        fcolor = color.c5
+                    elif self.__sequence[seq_id][frag_id].upper() in ('D','E','N','Q'):
+                        #AA
+                        fcolor = color.c6
+                    else:
+                        fcolor = color.black
+                    self.__color[seq_id].append(fcolor)
+                except IndexError:
+                    pass
+        return
+    def color_side_chain_polarity(self):
+        # initialize __color to store result
+        self.__color = [[] for i in range(len(self.__sequence))]
+        for frag_id in range(len(self.max_frag_frequency)):
+            for seq_id in range( len(self.__sequence)):
+                try:
+                    if self.__sequence[seq_id][frag_id] == '-':
+                        fcolor = color.gray
+                    elif self.__sequence[seq_id][frag_id].upper() in ('A','C','G','I','L','M','F','P','W','V'):
+                        # Nonpolar
+                        fcolor = color.c1
+                    elif self.__sequence[seq_id][frag_id].upper() in ('R','H','K'):
+                        # Basic polar
+                        fcolor = color.c2
+                    elif self.__sequence[seq_id][frag_id].upper() in ('N','Q','S','T','Y'):
+                        # Polar
+                        fcolor = color.c3
+                    elif self.__sequence[seq_id][frag_id].upper() in ('D','E'):
+                        # Acidic polar
+                        fcolor = color.c4
+                    else:
+                        fcolor = color.black
+                    self.__color[seq_id].append(fcolor)
+                except IndexError:
+                    pass
+        return
+    def color_side_chain_charge(self):
+        # initialize __color to store result
+        self.__color = [[] for i in range(len(self.__sequence))]
+        for frag_id in range(len(self.max_frag_frequency)):
+            for seq_id in range( len(self.__sequence)):
+                try:
+                    if self.__sequence[seq_id][frag_id] == '-':
+                        fcolor = color.gray
+                    elif self.__sequence[seq_id][frag_id].upper() in ('A','N','C','Q','G','H','I','L','M','F','P','S','T','W','Y','V'):
+                        # Neutral
+                        fcolor = color.c1
+                    elif self.__sequence[seq_id][frag_id].upper() in ('R','K'):
+                        # Positive
+                        fcolor = color.c2
+                    elif self.__sequence[seq_id][frag_id].upper() in ('D','E'):
+                        # Negative
+                        fcolor = color.c3
+                    else:
+                        fcolor = color.black
+                    self.__color[seq_id].append(fcolor)
+                except IndexError:
+                    pass
+        return
+    def color_side_chain_solvent(self):
+        # initialize __color to store result
+        self.__color = [[] for i in range(len(self.__sequence))]
+        for frag_id in range(len(self.max_frag_frequency)):
+            for seq_id in range( len(self.__sequence)):
+                try:
+                    if self.__sequence[seq_id][frag_id] == '-':
+                        fcolor = color.gray
+                    elif self.__sequence[seq_id][frag_id].upper() in ('R','K','D','E'):
+                        # Charged
+                        fcolor = color.c1
+                    elif self.__sequence[seq_id][frag_id].upper() in ('Q','N','H','S','T','Y','C','M','W'):
+                        # Polar
+                        fcolor = color.c2
+                    elif self.__sequence[seq_id][frag_id].upper() in ('A','I','L','F','V','P','G'):
+                        # Hydrophobic
+                        fcolor = color.c3
+                    else:
+                        fcolor = color.black
+                    self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
         return
