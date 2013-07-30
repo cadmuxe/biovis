@@ -28,28 +28,25 @@ finally:
 	# Drop table if it already exist using execute() method.
 	# ignore foreign keys when deleting
     
-    # cursor.execute("SET FOREIGN_KEY_CHECKS=0")
-    # 
-    # cursor.execute("DROP TABLE IF EXISTS lookup")
-	#RUNTYPE	CRC64	SequenceID	ModelID	TargetBeg	TargetEnd	PDBCode	PDBChain	PDBBegin
-	#PDBEnd	SeqIdentity	Evalue	ModelScore	ModPipeQualityScore	ZDopeScore	ModelDate
-	## add main table
-	# "INSERT INTO table (name, id, datecolumn) VALUES (%s, %s, %s)",("name", 4,now)
-	#import time    
-    #time.strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute("SET FOREIGN_KEY_CHECKS=0")
+    
+    cursor.execute("DROP TABLE IF EXISTS lookup")
+    #RUNTYPE CRC64   SequenceID  ModelID TargetBeg   TargetEnd   PDBCode PDBChain    PDBBegin
+    #PDBEnd  SeqIdentity Evalue  ModelScore  ModPipeQualityScore ZDopeScore  ModelDate
+    # add main table
 
-    #     table = """CREATE TABLE lookup(
-    #             PDB varchar(4) NOT NULL,
-    #             CHAIN varchar(1) NOT NULL,
-    #             FASTA varchar(6) NOT NULL,
-    #             MODEL INT DEFAULT 0,
-    #             PRIMARY KEY(FASTA, PDB, CHAIN) )
-    #             """
-    #             
-    #     cursor.execute(table)    
-    # # check foreign keys again
-    #     cursor.execute("SET FOREIGN_KEY_CHECKS=1")
-    #     db.commit()
+    table = """CREATE TABLE lookup(
+            PDB varchar(4) NOT NULL,
+            CHAIN varchar(1) NOT NULL,
+            FASTA varchar(6) NOT NULL,
+            MODEL INT DEFAULT 0,
+            PRIMARY KEY(FASTA, PDB, CHAIN) )
+            """
+            
+    cursor.execute(table)    
+# check foreign keys again
+    cursor.execute("SET FOREIGN_KEY_CHECKS=1")
+    db.commit()
     
     idx = 0
     with open("./models_found.txt") as lines:

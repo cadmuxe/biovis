@@ -13,7 +13,7 @@ from SPaintWidget import *
 from GLPropertyBrowser import *
 
 class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
-    def __init__(self, parent=None):
+    def __init__(self, path, parent=None):
         
         self.parent = parent
         self.glstruct = None
@@ -29,12 +29,10 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         
         gluPerspective(45.0, self.width()/self.height(), 0.0001, 1000)
         
-        self.load_struct()
+        self.load_struct(path)
                     
     def load_struct(self, path = None):
-        
-        path = "./data/scTIM.pdb"
-        
+                
         try:
             struct = FileIO.LoadStructure(
                 fil              = path,

@@ -90,8 +90,8 @@ class MainWindow(QtGui.QMainWindow):
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
-        self.glWidgetSC = GLWidget(self.centralWidget)
-        self.glWidgetD = GLWidget(self.centralWidget)
+        self.glWidgetSC = GLWidget("./data/scTIM.pdb", self.centralWidget)
+        self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
                         
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
@@ -206,6 +206,9 @@ class MainWindow(QtGui.QMainWindow):
             options = QtGui.QAction('View 3D Model', self)
             options.triggered.connect( self.on_tim_clicked ) 
             timMenu.addAction(options)
+            
+            self.selected_PDB = row[0]
+            
         else:
             options = QtGui.QAction('No Model Generated', self)
             options.triggered.connect( self.on_tim_clicked ) 
@@ -237,17 +240,19 @@ class MainWindow(QtGui.QMainWindow):
         return
     
     def on_tim_clicked(self):
-        fasta =  self.selected_sequence_name[:6]
+       
+        name = "./data/PDB/P56076_2JGQ.pdb"#str(self.selected_sequence_name[:6]) + "_" + str(self.selected_PDB) + ".pdb"
+        self.PDB = "2JGQ"
+        self.FASTA = "P56076"
         
-        sql = "SELECT l.PDB, l.MODEL FROM lookup l WHERE l.FASTA = "
-        sql += """'""" + fasta + """'"""
+        #self.glWidgetSC = None
+        #self.view1.removeTab(0)
         
-        self.cursor.execute(sql)
-        result = self.cursor.fetchall()
+        self.glWidgetSC.load_struct(name)
+       # glWidgetSC.
+        #self.view1.insertTab(0,self.glWidgetSC, "scTIM")
+        self.browser2.load( 'http://www.rcsb.org/pdb/explore/explore.do?structureId=2JGQ' )
         
-        for row in result:
-            print int(row[1])
-            
         return
         
     # mouse actions
