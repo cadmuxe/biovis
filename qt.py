@@ -244,6 +244,7 @@ class MainWindow(QtGui.QMainWindow):
         action_normalized_common_resi_with_scTIM = sortingMenu.addAction("&Common residues with scTIM(Normalized)")
         action_number_common_resi_with_scTIM_without_posi = sortingMenu.addAction("&Common resi. with scTIM without position")
         action_percent_common_resi_with_scTIM_without_posi = sortingMenu.addAction("&Common resi. with scTIM without position%")
+        action_selection = sortingMenu.addAction("Sorting and coloring by selected scTIM fragment")
 
         self.connect(action_frequency, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(0))
         self.connect(action_edit_dist, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(1))
@@ -255,6 +256,7 @@ class MainWindow(QtGui.QMainWindow):
                      lambda: self.set_sorting(5))
         self.connect(action_percent_common_resi_with_scTIM_without_posi , QtCore.SIGNAL("triggered()"),
                      lambda: self.set_sorting(6))
+        self.connect(action_selection, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(7))
 
         coloringMenu = menuBar.addMenu("&Coloring")
         action_basic_coloring = coloringMenu.addAction("&Basic coloring")
@@ -295,6 +297,18 @@ class MainWindow(QtGui.QMainWindow):
         elif n == 6:
             self.current_sortting["func"] = self.__sequenceSet.sort_by_percent_of_common_residues_with_scTIM_without_position
             self.current_sortting["name"] = "Common residues percentage with scTIM without consider the position"
+        elif n == 7:
+            s = self.scTIMList.selectedItems()
+            selections = {}
+            for item in s:
+                selections[item.frag_id] = item.frag_name
+            self.__sequenceSet.sort_by_selection(selections)
+            self.__sequenceSet.color_selection(selections)
+            self.current_sortting["name"] = "Based on selected scTIM fragment"
+            self.current_coloring["name"] = "Common with selected scTIM fragment"
+            self.updateStatusBar()
+            self.__sequenceSet.updateColor(self.TIMs)
+            return
         self.current_sortting["func"]()
         self.current_coloring["func"]()
         self.updateStatusBar()

@@ -50,6 +50,9 @@ class sequenceSet(object):
             if lines[x][0] == '>':
                 self.__sequence.append(sequence(lines[x][1:], lines[x+1]))
         self.calculate_frag_frequency()
+    def clear_weight(self):
+        for seq in self.__sequence:
+            seq.weight = 0
     def loadscTIMFromFile(self, filename):
         f = open(filename)
         self.__scTIM = sequence("scTIM",f.readline().strip())
@@ -213,6 +216,27 @@ class sequenceSet(object):
                 except IndexError:
                     pass
         return
+    def color_selection(self, selections):
+        """
+        selections :{frag_id:frag_name}
+        """
+        self.__color = [[] for i in range(len(self.__sequence))]
+        for frag_id in range(len(self.max_frag_frequency)):
+            for seq_id in range( len(self.__sequence)):
+                try:
+                    if self.__sequence[seq_id][frag_id] == '-':
+                        fcolor = color.gray
+                    elif frag_id in selections.keys():
+                        if self.__sequence[seq_id][frag_id] == selections[frag_id]:
+                            fcolor = color.c1
+                        else:
+                            fcolor = color.black
+                    else:
+                        fcolor = color.black
+                    self.__color[seq_id].append(fcolor)
+                except IndexError:
+                    pass
+        return
 
 
     def calculate_frag_frequency(self):
@@ -249,12 +273,26 @@ class sequenceSet(object):
             for (frag, frequency) in frequency_list.items():
                 if frequency == m:
                     self.max_frag_frequency.append((frag_id,frag, frequency))
+    def sort_by_selection(self, selections):
+        """
+        selections : {frag_id:frag_name}
+        """
+        self.clear_weight()
+        for seq in self.__sequence:
+            for frag_id in selections.keys():
+                try:
+                    if seq[frag_id] == selections[frag_id]:
+                        seq.weight += 1
+                except IndexError:
+                    continue
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
 
     def sort_by_frag_frequency(self):
         """
         sort sequences by the frag_frequency, a larger fragment frequency has a big weight
         """
         # find out the largest frequency and convert it to float type
+        self.clear_weight()
         if not hasattr(self, "max_frag_frequency"):
             self.calculate_frag_frequency()
         largest =  max(self.max_frag_frequency, key=lambda f:f[2])[2] * 1.0
@@ -270,6 +308,7 @@ class sequenceSet(object):
         Sort by edit distance from scTIM
         Original from John Wenskovich in Java
         """
+        self.clear_weight()
         leve  = LeveDist(1, 1, 1)
         for seq in self.__sequence:
             seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
@@ -279,6 +318,7 @@ class sequenceSet(object):
         Sort by weighted edit distance from scTIM
         again from John
         """
+        self.clear_weight()
         leve = LeveDist(5, 5, 3)
         for seq in self.__sequence:
             seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
@@ -290,6 +330,7 @@ class sequenceSet(object):
         (single-sequence alignment)
         From John
         """
+        self.clear_weight()
         for seq in self.__sequence:
             similarityCounter = 0
             for i in range(min(len(seq.seq), len(self.__scTIM.seq))):
@@ -304,6 +345,7 @@ class sequenceSet(object):
         (normalized single-sequence alignment)
         Hello John
         """
+        self.clear_weight()
         for seq in self.__sequence:
             similarityPercentageCounter = 0.0
             for i in range(min(len(seq.seq), len(self.__scTIM.seq))):
@@ -318,6 +360,7 @@ class sequenceSet(object):
         of sequence position
         @ John
         """
+        self.clear_weight()
         scTIMCounter = sequenceCounter() 
         overallCount = 0
 
@@ -342,6 +385,7 @@ class sequenceSet(object):
         of sequence position
         Hi John
         """
+        self.clear_weight()
         scTIMCounter = sequenceCounter() 
         overallCount = 0
         scTIMPercentCount =0.0
@@ -368,6 +412,7 @@ class sequenceSet(object):
         sort by number of residue sequences of length N in common
         Thank you John
         """
+        self.clear_weight()
         for seq in self.__sequence:
             similarityLengthCounter = 0
             for i in range(min(len(seq.seq), len(self.__scTIM.seq))):
