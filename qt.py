@@ -4,6 +4,7 @@ import sys
 from vis import * # includes QT and openGL imports
 from sequenceSet import sequenceSet
 from barcharWidget import barcharWidget
+from web import Browser
 
 # Class that handles the mouse event filters 
 # to link the views
@@ -77,8 +78,15 @@ class MainWindow(QtGui.QMainWindow):
 
         self.dTIMLabel = QtGui.QLabel("dTIM")
         self.scTIMlabel = QtGui.QLabel("scTIM")
-
-        self.gridlayout.addWidget(self.glWidgetSC, 0, 0, 2, 1)
+        
+        self.view = QtGui.QTabWidget(self)
+        self.browser = Browser()
+        self.browser.load( 'http://www.reddit.com' )
+        
+        self.view.addTab(self.glWidgetSC,"dTIM")
+        self.view.addTab( self.browser,"Ref.")
+        
+        self.gridlayout.addWidget(self.view, 0, 0, 2, 1)
         self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
 
         self.gridlayout.addWidget(self.dTIMLabel, 0, 2, 1, 1)
@@ -90,7 +98,6 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 4)
         self.gridlayout.addWidget(self.barchar, 3, 0, 1, 4)
 
-        
         self.gridlayout.setColumnStretch(0,20)
         self.gridlayout.setColumnStretch(1,20)
         self.gridlayout.setColumnStretch(2,1)
