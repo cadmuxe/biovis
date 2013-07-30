@@ -62,8 +62,8 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
         self.setWindowTitle("2013 BioVis Contest")
-        #self.resize(1280, 1024)
-        self.resize(640, 512)
+        self.resize(1280, 1024)
+        #self.resize(640, 512)
         
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
@@ -79,15 +79,26 @@ class MainWindow(QtGui.QMainWindow):
         self.dTIMLabel = QtGui.QLabel("dTIM")
         self.scTIMlabel = QtGui.QLabel("scTIM")
         
-        self.view = QtGui.QTabWidget(self)
-        self.browser = Browser()
-        self.browser.load( 'http://www.reddit.com' )
+        self.view1 = QtGui.QTabWidget(self)
+        self.browser1 = Browser()
+        self.browser1.load( 'http://www.rcsb.org/pdb/explore/explore.do?structureId=2YPI' )
         
-        self.view.addTab(self.glWidgetSC,"dTIM")
-        self.view.addTab( self.browser,"Ref.")
+        self.view2 = QtGui.QTabWidget(self)
+        self.browser2 = Browser()
+        self.browser2.load( 'http://www.rcsb.org/pdb/explore/explore.do?structureId=2YPI' )
         
-        self.gridlayout.addWidget(self.view, 0, 0, 2, 1)
-        self.gridlayout.addWidget(self.glWidgetD, 0, 1, 2, 1)
+        #settings = QtWebKit.QWebSettings.globalSettings()
+        #settings.setFontFamily(QtWebKit.QWebSettings.StandardFont, 'Times New Roman')
+        #self.browser.settings().setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 8)
+        
+        self.view1.addTab(self.glWidgetSC,"scTIM")
+        self.view1.addTab( self.browser1,"Ref.")
+        
+        self.view2.addTab(self.glWidgetD,"dTIM")
+        self.view2.addTab( self.browser2,"Ref.")
+        
+        self.gridlayout.addWidget(self.view1, 0, 1, 2, 1)
+        self.gridlayout.addWidget(self.view2, 0, 0, 2, 1)
 
         self.gridlayout.addWidget(self.dTIMLabel, 0, 2, 1, 1)
         self.gridlayout.addWidget(self.dTIMList, 1, 2, 1, 1)
