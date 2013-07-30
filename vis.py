@@ -91,6 +91,7 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         #print "redraw"
         # why need to use updateGL, but glv_render() not works.
         # Answer: update Tells QT to refresh the widget
+    
     def update_select(self, fragment_id_list=[]):
         #print "update_select"
         self.update_fragment_id_list(fragment_id_list)

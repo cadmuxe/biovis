@@ -1,10 +1,12 @@
 #!/usr/bin/env python -W ignore::DeprecationWarning
 import sys
 
+from web import Browser
 from vis import * # includes QT and openGL imports
 from sequenceSet import sequenceSet
 from barcharWidget import barcharWidget
-from web import Browser
+import MySQLdb as mdb
+import dbinfo as DB
 
 # Class that handles the mouse event filters 
 # to link the views
@@ -16,7 +18,7 @@ class MyEventFilter(QtCore.QObject):
     moved    = QtCore.Signal(QtCore.QEvent)
     # mouse wheel event
     wheeled  = QtCore.Signal(QtCore.QEvent)
-    # context menu event
+    # context menu event for Viewer
     context = QtCore.Signal(Viewer.GLViewer, QtCore.QPoint)
     
     def __init__(self):
@@ -50,7 +52,6 @@ class MyEventFilter(QtCore.QObject):
                 return 1
         elif event.type() == QtCore.QEvent.ContextMenu:
             self.context.emit(obj, QtGui.QCursor.pos())
-            return 1
             
         return super(MyEventFilter,self).eventFilter(obj, event)
 
@@ -64,6 +65,27 @@ class MainWindow(QtGui.QMainWindow):
         self.setWindowTitle("2013 BioVis Contest")
         self.resize(1280, 1024)
         #self.resize(640, 512)
+        
+        info = DB.getInfo()
+        self.db = None
+        
+        try:
+            # Open database connection
+            self.db = mdb.connect( info["host"], info["username"],
+                info["password"], info["dbName"] )
+
+            # prepare a cursor object using cursor() method
+            self.cursor = self.db.cursor()
+            
+            sql = """SELECT l.FASTA FROM lookup l WHERE l.PDB ='2YPI' """
+            self.cursor.execute(sql)
+            fasta = self.cursor.fetchone()
+            
+            self.PDB = "2YPI"
+            self.FASTA = fasta[0]
+            
+        except mdb.Error, e:
+            exit(1)
         
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
@@ -80,11 +102,11 @@ class MainWindow(QtGui.QMainWindow):
         self.scTIMlabel = QtGui.QLabel("scTIM")
         
         self.view1 = QtGui.QTabWidget(self)
-        self.browser1 = Browser()
+        self.browser1 = Browser(self.PDB, self.FASTA)
         self.browser1.load( 'http://www.rcsb.org/pdb/explore/explore.do?structureId=2YPI' )
         
         self.view2 = QtGui.QTabWidget(self)
-        self.browser2 = Browser()
+        self.browser2 = Browser(self.PDB, self.FASTA)
         self.browser2.load( 'http://www.rcsb.org/pdb/explore/explore.do?structureId=2YPI' )
         
         #settings = QtWebKit.QWebSettings.globalSettings()
@@ -122,7 +144,7 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralWidget)
         
         # create the event filter
-        self.myEF =MyEventFilter()
+        self.myEF = MyEventFilter()
          
         # link  to each widgets mouse events
         self.myEF.pressed.connect(self.pressEvent)
@@ -132,6 +154,7 @@ class MainWindow(QtGui.QMainWindow):
         # link event filter to context menu
         self.glWidgetSC.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.glWidgetD.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        
         self.myEF.context.connect(self.on_context_menu)
         
         # install the new event filter
@@ -143,19 +166,57 @@ class MainWindow(QtGui.QMainWindow):
         self.initTIMs()
         self.initMenus()
         self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
+        
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
+        
         def print_name(name):
             self.selected_sequence_name =  name
             self.updateStatusBar()
+        
         self.TIMs.registerClickCallBack({"name":"seq_name", "func":print_name})
-
+        
+        self.TIMs.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.connect(self.TIMs, QtCore.SIGNAL('customContextMenuRequested(const QPoint&)'), self.on_TIM_menu)
+        
     def ready(self):
         # ready to render
         self.glWidgetSC.setStatus()
         self.glWidgetD.setStatus()
     
-    def on_context_menu(self, obj, point):
+    def on_TIM_menu(self, point):
+        
+        fasta =  self.selected_sequence_name[:6]
+        model = 0
+        
+        sql = "SELECT l.PDB, l.MODEL FROM lookup l WHERE l.FASTA = "
+        sql += """'""" + fasta + """'"""
+        
+        self.cursor.execute(sql)
+        result = self.cursor.fetchall()
+        
+        # create context menu content
+        timMenu = QtGui.QMenu(self)
+        
+        for row in result:
+            if int(row[1]) > 0:
+                model = 1
                 
+        if model > 0:
+                
+            options = QtGui.QAction('View 3D Model', self)
+            options.triggered.connect( self.on_tim_clicked ) 
+            timMenu.addAction(options)
+        else:
+            options = QtGui.QAction('No Model Generated', self)
+            options.triggered.connect( self.on_tim_clicked ) 
+            options.setDisabled(True)
+            
+            timMenu.addAction(options)
+        
+        timMenu.exec_(QtGui.QCursor.pos())
+            
+    def on_context_menu(self, obj, point):
+        
         # create context menu content
         self.popMenu = QtGui.QMenu(self)
         options = QtGui.QAction('Rendering Options', self)
@@ -172,9 +233,21 @@ class MainWindow(QtGui.QMainWindow):
     
     # when an item in the menu is clicked
     def on_item_clicked(self):
-        
         self.me.showEditor()
+        return
+    
+    def on_tim_clicked(self):
+        fasta =  self.selected_sequence_name[:6]
         
+        sql = "SELECT l.PDB, l.MODEL FROM lookup l WHERE l.FASTA = "
+        sql += """'""" + fasta + """'"""
+        
+        self.cursor.execute(sql)
+        result = self.cursor.fetchall()
+        
+        for row in result:
+            print int(row[1])
+            
         return
         
     # mouse actions
@@ -331,7 +404,6 @@ class MainWindow(QtGui.QMainWindow):
         self.current_coloring["func"]()
         self.updateStatusBar()
         self.__sequenceSet.updateColor(self.TIMs)
-
 
     def set_coloring(self, n):
         if n == 0:

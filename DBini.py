@@ -99,17 +99,17 @@ finally:
             test = cursor.fetchone()
                         
             if int(test[0]) > 0:
-                print test[0]
+                #print test[0]
                 continue    
                 
-            print values[-2]            
+            #print values[-2]            
             sql = """INSERT INTO modbase (RUNTYPE, CRC, SequenceID, ModelID, TargetBeg, """
             sql += """TargetEnd, PDBCode, PDBChain, PDBBegin, PDBEnd, SeqId, Evalue, ModelScore, """
             sql += """ModPipeQualityScore, ZDopeScore, ModelDate) VALUES (""" 
             sql += values[:-2] 
             sql += """)""" 
             
-            print sql
+            #print sql
             
             cursor.execute(sql)
             
