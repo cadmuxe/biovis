@@ -108,3 +108,16 @@ class ListWidgetItem(QtGui.QListWidgetItem):
         self.__callback = {}
     def get_fragment_id(self):
         return self.frag_id
+class ColorWidget(QtGui.QWidget):
+    def __init__(self, parent = None):
+        QtGui.QWidget.__init__(self, parent)
+
+        hbox = QtGui.QHBoxLayout(self)
+        pixmap = QtGui.QPixmap("data/color.png")
+        lbl = QtGui.QLabel(self)
+        lbl.setPixmap(pixmap)
+
+        hbox.addWidget(lbl)
+        self.setLayout(hbox)
+        self.setWindowTitle('Coloring schemes')
+
