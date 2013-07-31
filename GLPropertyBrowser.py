@@ -11,7 +11,7 @@ def markup_vector3(vector):
         vector[0], vector[1], vector[2])
 
 def markup_matrix3(tensor):
-    """Uses pango markup to make the presentation of the tenosr
+    """Uses pango markup to make the presentation of the tensor
     look nice.
     """
     return "<small>%7.4f %7.4f %7.4f\n"\
@@ -186,6 +186,10 @@ class GLPropertyEditor(QtGui.QTabWidget):
             table.setCellWidget(table_row, 1, edit_widget)
 
             table_row += 1
+
+            table.verticalHeader().setStretchLastSection(False)
+            table.resizeRowsToContents()
+            table.verticalHeader().setStretchLastSection(True)
 
         #table.show()
         return table
@@ -637,7 +641,7 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
     def setupUi(self, GLPropertyBrowserDialog):
 
           GLPropertyBrowserDialog.setWindowModality(QtCore.Qt.WindowModal)
-          GLPropertyBrowserDialog.resize(720, 430)
+          GLPropertyBrowserDialog.resize(1080, 645)
           GLPropertyBrowserDialog.setModal(False)
 
           #initialize layouts

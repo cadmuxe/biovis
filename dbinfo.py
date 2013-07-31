@@ -2,7 +2,7 @@
 def getInfo():
 	
 	dbInfo = {
-		"host": "localhost", 
+		"host": "67.171.96.127", 
 		"username": "root",
 		"password": "root",
 		"dbName": "biovis"

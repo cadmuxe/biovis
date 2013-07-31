@@ -72,7 +72,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             # Open database connection
             self.db = mdb.connect( info["host"], info["username"],
-                info["password"], info["dbName"] )
+                info["password"], info["dbName"])
 
             # prepare a cursor object using cursor() method
             self.cursor = self.db.cursor()
@@ -85,6 +85,7 @@ class MainWindow(QtGui.QMainWindow):
             self.FASTA = fasta[0]
             
         except mdb.Error, e:
+            print e
             exit(1)
         
         self.centralWidget = QtGui.QWidget(self)

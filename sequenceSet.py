@@ -312,7 +312,7 @@ class sequenceSet(object):
     def sort_by_edit_dist(self):
         """
         Sort by edit distance from scTIM
-        Original from John Wenskovich in Java
+        Original from John Wenskovitch in Java
         """
         self.clear_weight()
         leve  = LeveDist(1, 1, 1)

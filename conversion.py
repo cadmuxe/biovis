@@ -49,12 +49,44 @@ finally:
     db.commit()
     
     idx = 0
-    with open("./models_found.txt") as lines:
+    with open("./pdb_uniprot_chain_map.lst.2") as lines:
         
         for line in lines:
-           
-            att = line.split(',')
+                
+            #initial table
+            att = line.split()
+             
+            if len(att) < 3:
+                att.append('NULL')
+             
+            sql = """SELECT COUNT(*) as c FROM (SELECT 1 FROM lookup l """
+            sql += """WHERE l.PDB = '"""
+            sql += att[0] + """' and l.CHAIN = '""" 
+            sql += att[1] + """' and l.FASTA = '""" + att[2] + """' ) as d """
+             
+            cursor.execute(sql)
+            test = cursor.fetchone()
+             
+            if int(test[0]) > 0:
+                #print test[0]
+                continue    
+                 
+             #print values[-2]            
+            sql = """INSERT INTO lookup (PDB, CHAIN, FASTA, MODEL) """
+            sql += """VALUES ('""" 
+            sql += att[0] + """', '""" + att[1] + """', '""" + att[2] 
+            sql += """', 0)""" 
+                         
+            print sql
+             
+            cursor.execute(sql)
+    
+    with open("./models_found.txt") as lines:
+
+        for line in lines:
             
+            att = line.split(',')
+                        
             sql = """SELECT COUNT(*) as c FROM (SELECT 1 FROM lookup l """
             sql += """WHERE l.FASTA = '"""
             sql += att[0]
@@ -80,36 +112,7 @@ finally:
                 
                 print sql
                 
-                cursor.execute(sql)
-                
-            #initial table
-            # att = line.split()
-            # 
-            # if len(att) < 3:
-            #     att.append('NULL')
-            # 
-            # sql = """SELECT COUNT(*) as c FROM (SELECT 1 FROM lookup l """
-            # sql += """WHERE l.PDB = '"""
-            # sql += att[0] + """' and l.CHAIN = '""" 
-            # sql += att[1] + """' and l.FASTA = '""" + att[2] + """' ) as d """
-            # 
-            # cursor.execute(sql)
-            # test = cursor.fetchone()
-            # 
-            # if int(test[0]) > 0:
-            #     #print test[0]
-            #     continue    
-            #     
-            # #print values[-2]            
-            # sql = """INSERT INTO lookup (PDB, CHAIN, FASTA, MODEL) """
-            # sql += """VALUES ('""" 
-            # sql += att[0] + """', '""" + att[1] + """', '""" + att[2] 
-            # sql += """', 0)""" 
-            #             
-            # print sql
-            # 
-            # cursor.execute(sql)
-            
+                cursor.execute(sql)        
 db.commit()
 # disconnect from server
 db.close()
