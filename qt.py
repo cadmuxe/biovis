@@ -126,7 +126,8 @@ class MainWindow(QtGui.QMainWindow):
         # install the new event filter
         self.glWidgetSC.installEventFilter(self.myEF)
         self.glWidgetD.installEventFilter(self.myEF)
-        
+
+        self.color_scheme = ColorWidget()
         self.initActions()
         self.initListWidget()
         self.initTIMs()
@@ -266,6 +267,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(action_selection, QtCore.SIGNAL("triggered()"), lambda: self.set_sorting(7))
 
         coloringMenu = menuBar.addMenu("&Coloring")
+        action_color_scheme = coloringMenu.addAction("&Coloring schemes")
         action_basic_coloring = coloringMenu.addAction("&Basic coloring")
         action_frequency_color = coloringMenu.addAction("&Frequency coloring")
         action_general_chemical = coloringMenu.addAction("&General chemical coloring")
@@ -281,6 +283,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(action_side_chain_charge, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(4))
         self.connect(action_side_chain_solvent, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(5))
         self.connect(action_common_with_scTIM, QtCore.SIGNAL("triggered()"), lambda:self.set_coloring(6))
+        self.connect(action_color_scheme, QtCore.SIGNAL("triggered()"), lambda:self.color_scheme.show())
 
         self.setMenuBar(menuBar)
 
@@ -417,6 +420,7 @@ app = QtGui.QApplication(sys.argv)
 
 win = MainWindow()
 win.show()
+
 
 win.ready()
 
