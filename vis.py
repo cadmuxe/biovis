@@ -102,7 +102,7 @@ class ListWidget(QtGui.QListWidget):
 
 class ListWidgetItem(QtGui.QListWidgetItem):
     def __init__(self, text , parent, frag_id=None):
-        QtGui.QListWidgetItem.__init__(self, text, parent)
+        QtGui.QListWidgetItem.__init__(self, "%s (%i)" % (text, frag_id), parent)
         self.frag_name = text
         self.frag_id = frag_id
         self.__callback = {}

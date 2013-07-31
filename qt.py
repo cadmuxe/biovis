@@ -361,6 +361,7 @@ class MainWindow(QtGui.QMainWindow):
         action_side_chain_polarity = coloringMenu.addAction("&Side-chain polarity coloring")
         action_side_chain_charge = coloringMenu.addAction("&Side-chain charge coloring(pH7.4)")
         action_side_chain_solvent = coloringMenu.addAction("&Side-chain polar solvent")
+        action_common_with_scTIM = coloringMenu.addAction("&Common fragment with scTIM")
 
         self.connect(action_basic_coloring, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(0))
         self.connect(action_frequency_color, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(1))
@@ -368,6 +369,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(action_side_chain_polarity, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(3))
         self.connect(action_side_chain_charge, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(4))
         self.connect(action_side_chain_solvent, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(5))
+        self.connect(action_common_with_scTIM, QtCore.SIGNAL("triggered()"), lambda:self.set_coloring(6))
 
         self.setMenuBar(menuBar)
 
@@ -429,6 +431,9 @@ class MainWindow(QtGui.QMainWindow):
         elif n == 5:
             self.current_coloring["func"] = self.__sequenceSet.color_side_chain_solvent
             self.current_coloring["name"] = "Based on the propensity of a side chain to be in contact with polar solvent like water"
+        elif n == 6:
+            self.current_coloring["func"] = self.__sequenceSet.color_common_with_scTim
+            self.current_coloring["name"] = "Common fragment with scTIM"
 
         self.current_coloring["func"]()
         self.updateStatusBar()
@@ -459,7 +464,7 @@ class MainWindow(QtGui.QMainWindow):
         scTIM =[frag for frag in line]
 
         # create one list of both TIMs
-        frag_id = range(2,300)
+        frag_id = range(1,300)
         items = zip(frag_id,dTIM,scTIM)
         self.__different_frag_id=set()
 
