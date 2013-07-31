@@ -237,6 +237,12 @@ class sequenceSet(object):
                 except IndexError:
                     pass
         return
+    def color_common_with_scTim(self):
+        frag_ids = range(1,300)
+        selection ={}
+        for (k,v) in zip(frag_ids, self.__scTIM):
+            selection[k] = v
+        self.color_selection(selection)
 
 
     def calculate_frag_frequency(self):
