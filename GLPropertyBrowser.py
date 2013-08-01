@@ -115,6 +115,12 @@ class GLPropertyEditor(QtGui.QTabWidget):
 
         ## create table widget
         table = QtGui.QTableWidget(num_properties, 2 , None)
+        table.setStyleSheet("QTableWidget{ border-top-color: transparent; border-bottom-color: transparent; border-right-color: transparent; border-left-color: transparent;}")
+        #table.horizontalHeader().setStretchLastSection(True)
+                
+        table.verticalHeader().setVisible(False)
+        table.horizontalHeader().setVisible(False)
+        #table.
         #table.set_border_width(5)
         #table.set_row_spacings(5)
         #table.set_col_spacings(10)
@@ -155,7 +161,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
             table_row += 1
         #print "exit boolean list"
         ## now create all the widgets for non-boolean types
-        for prop_desc in prop_desc_list:
+        for prop_desc in prop_desc_list: 
             name = prop_desc["name"]
             
             ## boolean types were already handled
@@ -187,11 +193,25 @@ class GLPropertyEditor(QtGui.QTabWidget):
 
             table_row += 1
 
-            table.verticalHeader().setStretchLastSection(False)
-            table.resizeRowsToContents()
-            table.verticalHeader().setStretchLastSection(True)
+            #table.verticalHeader().setStretchLastSection(False)
+            #table.resizeRowsToContents()
+            #table.verticalHeader().setStretchLastSection(True)
 
         #table.show()
+        
+        rows = table.columnCount()
+        cell = table.item(0,1)
+        
+        if rows > 1 and cell is None:
+            table.removeColumn(1)
+       
+        #print cell
+        
+        table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
+        table.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        
+        #table.resizeColumnsToContents()
+        
         return table
 
     def destroy(self, widget):
@@ -641,7 +661,7 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
     def setupUi(self, GLPropertyBrowserDialog):
 
           GLPropertyBrowserDialog.setWindowModality(QtCore.Qt.WindowModal)
-          GLPropertyBrowserDialog.resize(1080, 645)
+          GLPropertyBrowserDialog.resize(1024, 768)
           GLPropertyBrowserDialog.setModal(False)
 
           #initialize layouts
