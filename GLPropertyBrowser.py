@@ -118,8 +118,8 @@ class GLPropertyEditor(QtGui.QTabWidget):
         table.setStyleSheet("QTableWidget{ border-top-color: transparent; border-bottom-color: transparent; border-right-color: transparent; border-left-color: transparent;}")
         #table.horizontalHeader().setStretchLastSection(True)
                 
-        table.verticalHeader().setVisible(False)
-        table.horizontalHeader().setVisible(False)
+        #table.verticalHeader().setVisible(False)
+        #table.horizontalHeader().setVisible(False)
         #table.
         #table.set_border_width(5)
         #table.set_row_spacings(5)
@@ -189,7 +189,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
             ## add to size group and attach to table
             #size_group.add_widget(edit_widget)
             
-            table.setCellWidget(table_row, 1, edit_widget)
+            #table.setCellWidget(table_row, 1, edit_widget)
 
             table_row += 1
 
@@ -208,7 +208,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
         #print cell
         
         table.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-        table.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
+        #table.setSizePolicy(QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         
         #table.resizeColumnsToContents()
         
@@ -310,7 +310,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
                     step = float(step)
 
                     widget = QtGui.QSlider(QtCore.Qt.Horizontal)
-                    widget.setValue(2)
+                    widget.setValue(1)
                     widget.setRange(min, max)
                     widget.setTickInterval(step)
 
@@ -324,7 +324,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
                     step = float(step)
 
                     widget = QtGui.QSpinBox()
-                    widget.setValue(2)
+                    widget.setValue(1)
                     widget.setSingleStep(step)
                     widget.setRange(min, max)
                     #widget.set_increments(step, step*10.0)
@@ -438,12 +438,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
                 #print widget.isChecked()
                 if widget.isChecked() == True:
                     update_dict[name] = True
-                    if prop["name"] == "cpk":
-                        print "checked in apply: " + prop["name"]
-                        print prop.keys()
-                        print " "
-                        print prop.values()
-                        print " "
+
                 else:
                     update_dict[name] = False
 
@@ -472,10 +467,10 @@ class GLPropertyEditor(QtGui.QTabWidget):
             elif prop["type"]=="enum_string":
                 update_dict[name] = widget.get_string()
                 
-        print "update dict"
-        print update_dict.keys()
-        print " "
-        print update_dict.values()
+        #print "update dict"
+        #print update_dict.keys()
+        #print " "
+        #print update_dict.values()
         self.gl_object.glo_update_properties(**update_dict)
 
 class GLPropertyTreeControl(QtGui.QTreeView):
@@ -691,6 +686,7 @@ class GLPropertyBrowserDialog(QtGui.QDialog):
           
           # assign widgets
           self.hpane2.addItem(spacerItem)
+          
           self.verticalLayout.addWidget(self.abtn)
           self.hpane2.addLayout(self.verticalLayout)
           self.hpane2.addWidget(self.cbtn)

@@ -91,7 +91,7 @@ class MainWindow(QtGui.QMainWindow):
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
-        self.glWidgetSC = GLWidget("./data/scTIM.pdb", self.centralWidget)
+        self.glWidgetSC = GLWidget("./data/C7JHB8_ACEP3.B99990002.pdb", self.centralWidget)
         self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
                         
         self.dTIMList = ListWidget(self.centralWidget)
