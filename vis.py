@@ -4,9 +4,11 @@ from PySide.QtOpenGL import *
 
 import OpenGL
 
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+import new
 
 from mmLib import FileIO, Structure, Viewer, OpenGLDriver
 from SPaintWidget import *
@@ -30,6 +32,13 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         gluPerspective(45.0, self.width()/self.height(), 0.0001, 1000)
         
         self.load_struct(path)
+
+        ## install new draw method
+        #self.install_draw_method({ "name":"lines",
+        #      "func":                glal_draw_lines,
+        #      "transparent":         False,
+        #      "visible_property":    "lines",
+        #      "recompile_action":    "recompile_lines" })
                     
     def load_struct(self, path = None):
                 
@@ -94,6 +103,15 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         #print "update_select"
         self.update_fragment_id_list(fragment_id_list)
         self.glv_redraw()
+    def install_draw_method(self,method):
+        for glstructure in self.glo_iter_children():
+            for glchain in glstructure.glo_iter_children():
+                if isinstance(glchain, Viewer.GLChain):
+                    instancemethod = new.instancemethod(method["func"], glchain, Viewer.GLChain)
+                    for i in glchain.gldl_draw_method_list:
+                        # this method looks bad, but i have not other choice
+                        if i["name"] == method["name"]:
+                            i["func"] = instancemethod
 
 class ListWidget(QtGui.QListWidget):
     def __init__(self,text, parent = None):
@@ -121,3 +139,43 @@ class ColorWidget(QtGui.QWidget):
         self.setLayout(hbox)
         self.setWindowTitle('Coloring schemes')
 
+
+def glal_draw_lines(self):
+    """Draw a atom using bond lines only.
+    """
+    ## driver optimization
+    glr_set_material_rgb = self.driver.glr_set_material_rgb
+    glr_line             = self.driver.glr_line
+    glr_cross            = self.driver.glr_cross
+    ##
+
+    self.driver.glr_lighting_disable()
+    self.driver.glr_set_line_width(self.properties["line_width"])
+
+    for atm1, pos1 in self.glal_iter_visible_atoms():
+        glr_set_material_rgb(*self.glal_calc_color(atm1))
+
+        if len(atm1.bond_list)>0:
+            ## if there are bonds, then draw the lines 1/2 way to the
+            ## bonded atoms
+            print dir(atm1)
+            print type(atm1)
+            for bond in atm1.iter_bonds():
+                atm2 = bond.get_partner(atm1)
+                try:
+                    pos2 = self.glal_visible_atoms_dict[atm2]
+                except KeyError:
+                    if self.glal_hidden_atoms_dict.has_key(atm2):
+                        continue
+                    else:
+                        pos2 = self.glal_calc_position(atm2.position)
+
+                end = pos1 + ((pos2 - pos1) / 2)
+                glr_line(pos1, end)
+
+        ## draw a cross for non-bonded atoms
+        else:
+            glr_cross(
+                pos1,
+                self.glal_calc_color(atm1),
+                self.properties["line_width"])

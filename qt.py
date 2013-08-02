@@ -358,7 +358,6 @@ class MainWindow(QtGui.QMainWindow):
 
         coloringMenu = menuBar.addMenu("&Coloring")
         action_color_scheme = coloringMenu.addAction("&Coloring schemes")
-        action_basic_coloring = coloringMenu.addAction("&Basic coloring")
         action_frequency_color = coloringMenu.addAction("&Frequency coloring")
         action_general_chemical = coloringMenu.addAction("&General chemical coloring")
         action_side_chain_polarity = coloringMenu.addAction("&Side-chain polarity coloring")
@@ -366,7 +365,6 @@ class MainWindow(QtGui.QMainWindow):
         action_side_chain_solvent = coloringMenu.addAction("&Side-chain polar solvent")
         action_common_with_scTIM = coloringMenu.addAction("&Common fragment with scTIM")
 
-        self.connect(action_basic_coloring, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(0))
         self.connect(action_frequency_color, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(1))
         self.connect(action_general_chemical, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(2))
         self.connect(action_side_chain_polarity, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(3))
@@ -485,8 +483,8 @@ class MainWindow(QtGui.QMainWindow):
         self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa")
         self.__sequenceSet.loadscTIMFromFile("data/scTIM.fa")
         self.current_sortting={"func":"", "name":"Haven't been sorted"}
-        self.current_coloring ={"func":self.__sequenceSet.basicColor, "name":"Basic coloring"}
-        self.__sequenceSet.basicColor()                 # could use other coloring method
+        self.current_coloring ={"func":self.__sequenceSet.frequencyColor, "name":"Frequency coloring"}
+        self.__sequenceSet.frequencyColor()                 # could use other coloring method
         self.__sequenceSet.updateColor(self.TIMs)
         self.updateStatusBar()
         self.TIMs.set_sequenceData(self.__sequenceSet)
