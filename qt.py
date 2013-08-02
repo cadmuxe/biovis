@@ -115,10 +115,10 @@ class MainWindow(QtGui.QMainWindow):
         #self.browser.settings().setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 8)
         
         self.view1.addTab(self.glWidgetSC,"scTIM")
-        self.view1.addTab( self.browser1,"Ref.")
+        self.view1.addTab( self.browser1,"dTIM Ref.")
         
         self.view2.addTab(self.glWidgetD,"dTIM")
-        self.view2.addTab( self.browser2,"Ref.")
+        self.view2.addTab( self.browser2,"scTIM Ref.")
         
         self.gridlayout.addWidget(self.view1, 0, 1, 2, 1)
         self.gridlayout.addWidget(self.view2, 0, 0, 2, 1)

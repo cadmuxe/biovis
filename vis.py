@@ -100,9 +100,18 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         # Answer: update Tells QT to refresh the widget
     
     def update_select(self, fragment_id_list=[]):
+        
         #print "update_select"
-        self.update_fragment_id_list(fragment_id_list)
-        self.glv_redraw()
+        #self.update_fragment_id_list(fragment_id_list)
+        #self.glv_redraw()
+        # for frag in self.glstruct.iter_fragments():
+        #     print frag  
+        #print fragment_id_list
+        for child in self.glstruct.glo_iter_children():
+            if isinstance(child, Viewer.GLChain):    
+                for frag in child.glal_iter_atoms():
+                    print type(frag.get_fragment())
+    
     def install_draw_method(self,method):
         for glstructure in self.glo_iter_children():
             for glchain in glstructure.glo_iter_children():

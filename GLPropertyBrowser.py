@@ -450,7 +450,7 @@ class GLPropertyEditor(QtGui.QTabWidget):
                 else:
                     try:
                         update_dict[name] = int(widget.get_text())
-                    except ValueError:
+                    except ValueError:  
                         pass
                     
             elif prop["type"]=="float":
