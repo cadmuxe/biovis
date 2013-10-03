@@ -56,7 +56,7 @@ class MyPaintWidget(QtGui.QWidget):
         self.cursor_button = QtCore.Qt.MouseButton.NoButton
 
         self.__scroll_button_position_hor = 0.0
-        self.__horizontal_selection_element_num = 20
+        self.__horizontal_selection_element_num = 5
 
     def __update_size_info(self):
         """

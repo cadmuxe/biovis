@@ -495,7 +495,7 @@ class MainWindow(QtGui.QMainWindow):
     def barchar_update(self, selection_f, selection_t, seqid, fragid):
         seq = self.__sequenceSet[seqid].seq
         #frag_from, frag_to = selection_f, selection_t
-        frag_from, frag_to = selection_f, selection_t
+        frag_from, frag_to = selection_f - 5, selection_t + 5
         if frag_to > len(seq):
             frag_to = len(seq)
         if frag_from > len(seq):
