@@ -11,7 +11,6 @@ import pymol2
 
 
 
-
 class PymolQtWidget(QGLWidget):
      _buttonMap = {Qt.LeftButton:0,
                  Qt.MidButton:1,
@@ -50,6 +49,8 @@ class PymolQtWidget(QGLWidget):
      def __del__(self):
          pass
 
+     def pymol_feedback(self):
+         pass
      def _updateGlobalSettings(self):
          #for k,v in globalSettings.settings.iteritems():
          #    self.pymol.cmd.set(k, v)
@@ -77,12 +78,17 @@ class PymolQtWidget(QGLWidget):
          self.pymol.button(self._buttonMap[ev.button()], 0, ev.x(),
 self.height()-ev.y(),0)
          self._pymolProcess()
+         #print self.pymol.cmd.get_names("all")
+         #print self.pymol.cmd.get("scTIM", "active_selections")
 
      def mouseReleaseEvent(self, ev):
          self.pymol.button(self._buttonMap[ev.button()], 1, ev.x(),
 self.height()-ev.y(),0)
          self._pymolProcess()
          self._timer.start(0)
+         my_dict={"list":[]}
+         self.cmd.iterate("(sele)","list.append((resi,resn))",space=my_dict)
+         print my_dict["list"]
 
      def resizeGL(self, w, h):
          self.pymol.reshape(w,h, True)
