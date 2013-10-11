@@ -71,18 +71,18 @@ class MainWindow(QtGui.QMainWindow):
         
         try:
             # Open database connection
-            self.db = mdb.connect( info["host"], info["username"],
-                info["password"], info["dbName"])
-
-            # prepare a cursor object using cursor() method
-            self.cursor = self.db.cursor()
-            
-            sql = """SELECT l.FASTA FROM lookup l WHERE l.PDB ='2YPI' """
-            self.cursor.execute(sql)
-            fasta = self.cursor.fetchone()
+            # self.db = mdb.connect( info["host"], info["username"],
+            #     info["password"], info["dbName"])
+            # 
+            # # prepare a cursor object using cursor() method
+            # self.cursor = self.db.cursor()
+            # 
+            # sql = """SELECT l.FASTA FROM lookup l WHERE l.PDB ='2YPI' """
+            # self.cursor.execute(sql)
+            # fasta = self.cursor.fetchone()
             
             self.PDB = "2YPI"
-            self.FASTA = fasta[0]
+            self.FASTA = "P00942" #fasta[0]
             
         except mdb.Error, e:
             print e
@@ -494,11 +494,13 @@ class MainWindow(QtGui.QMainWindow):
 
     def barchar_update(self, selection_f, selection_t, seqid, fragid):
         seq = self.__sequenceSet[seqid].seq
-        frag_from, frag_to = selection_f, selection_t
+        #frag_from, frag_to = selection_f, selection_t
+        frag_from, frag_to = selection_f - 5, selection_t + 5
         if frag_to > len(seq):
             frag_to = len(seq)
         if frag_from > len(seq):
             frag_from = len(seq)
+        
         frequency = [self.__sequenceSet.frag_frequency[i][seq[i]]/float(len(self.__sequenceSet)) if seq[i] !='-' else 0.0   for i in range(frag_from, frag_to)]
         self.barchar.update_sequences(frag_from, frag_to, seq[frag_from: frag_to],
                                       frequency)
