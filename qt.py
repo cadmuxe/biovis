@@ -328,7 +328,7 @@ class MainWindow(QtGui.QMainWindow):
         for item in self.dTIMList.selectedItems():
             self.dTIMList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
         for i in id_list:
-            self.dTIMList.setCurrentRow(i-2,QtGui.QItemSelectionModel.Select)
+            self.dTIMList.setCurrentRow(i-1,QtGui.QItemSelectionModel.Select)
 
     def initMenus(self):
         menuBar = self.menuBar()

@@ -38,7 +38,7 @@ class Browser(QWebView):
     def _result_available(self, ok):
         frame = self.page().mainFrame()
         #print unicode(frame.toHtml()).encode('utf-8')
-    
+
     def contextMenuEvent(self, event):  
         
         self.me = QMenu(self)

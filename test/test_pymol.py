@@ -8,22 +8,17 @@ import __main__
 __main__.pymol_argv = [ 'pymol', '-qc'] # Quiet and no GUI
 import pymol
 
-pymol.finish_launching()
- 
-buttonMap = {
-    Qt.LeftButton:0,
-    Qt.MidButton:1,
-    Qt.RightButton:2,
-}
  
 class PyMolWidget(QGLWidget):
     def __init__(self, parent=None):
         QGLWidget.__init__(self)
         self._enableUi = True
         self.pymol = pymol
-        self.pymol.cmd.load("scTIM.pdb")
-        self._COb = self.pymol._cmd._get_global_C_object()
+        #pymol.finish_launching()
+        pymol._init_internals(self)
+        self._COb = self.pymol._cmd._get_global_C_object(self)
         self.pymol._cmd._start(self._COb, self.pymol.cmd)
+        self.pymol.cmd.load("../data/scTIM.pdb")
         self.resize(400,300)
 
  
