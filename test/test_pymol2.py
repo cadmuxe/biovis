@@ -49,6 +49,7 @@ class PymolQtWidget(QGLWidget):
      def __del__(self):
          pass
 
+
      def pymol_feedback(self):
          pass
      def _updateGlobalSettings(self):

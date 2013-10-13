@@ -30,28 +30,8 @@ class MyEventFilter(QtCore.QObject):
         self.press = 1
 
     def eventFilter(self, obj, event):
-        
-        if event.type() == QtCore.QEvent.MouseButtonPress:
-            if event.button() == QtCore.Qt.LeftButton:
-                self.pressed.emit(event)
 
-                if self.press:
-                    return 1
-                else:
-                    self.hit()
-        
-        elif event.type() == QtCore.QEvent.Wheel:
-            self.wheeled.emit(event)
-            return 1
-        elif event.type() == QtCore.QEvent.MouseMove:
-            if self.press:
-                self.moved.emit(event)
-                return 1
-        elif event.type() == QtCore.QEvent.MouseButtonRelease:
-            if self.press:
-                self.press = 0
-                return 1
-        elif event.type() == QtCore.QEvent.ContextMenu:
+        if event.type() == QtCore.QEvent.ContextMenu:
             self.context.emit(obj, QtGui.QCursor.pos())
             
         return super(MyEventFilter,self).eventFilter(obj, event)
@@ -227,7 +207,7 @@ class MainWindow(QtGui.QMainWindow):
         
         # create context menu content
         self.popMenu = QtGui.QMenu(self)
-        options = QtGui.QAction('Rendering Options', self)
+        options = QtGui.QAction('Show Menu', self)
         options.triggered.connect( self.on_item_clicked ) 
         self.popMenu.addAction(options)
         # self.popMenu.addSeparator()
@@ -273,19 +253,6 @@ class MainWindow(QtGui.QMainWindow):
         if type(event) == QtGui.QMoveEvent:
             return
 
-        if self.cursor_button == QtCore.Qt.RightButton or \
-                    (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
-            self.glWidgetSC.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
-            self.glWidgetD.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
-
-        elif self.cursor_button == QtCore.Qt.LeftButton:
-
-            self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-            self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-
-            self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-            self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-
         self.cursor_pre_x = event.x()
         self.cursor_pre_y = event.y()
 
@@ -295,8 +262,6 @@ class MainWindow(QtGui.QMainWindow):
         if type(event) == QtGui.QMoveEvent:
             return
 
-        self.glWidgetSC.glv_zoom(event.delta())
-        self.glWidgetD.glv_zoom(event.delta())
 
     # keyboard actions
         
@@ -324,9 +289,6 @@ class MainWindow(QtGui.QMainWindow):
         self.dTIMList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.dTIMList.verticalScrollBar().valueChanged.connect(self.scTIMList.verticalScrollBar().setValue)
 
-    def update_scTIM_select_pymol(self, list):
-        pass
-
     def update_scTIM_select(self):
         id_list =[]
         for item in self.scTIMList.selectedItems():
@@ -336,9 +298,13 @@ class MainWindow(QtGui.QMainWindow):
             self.dTIMList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
         for i in id_list:
             self.dTIMList.setCurrentRow(i-1,QtGui.QItemSelectionModel.Select)
+
     def update_dTIM_select_pymol(self,l):
         for item in l:
             self.dTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
+            self.scTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
+            self.glWidgetSC.show_resi(int(item[0]))
+            self.glWidgetD.show_resi(int(item[0]))
 
 
     def initMenus(self):
@@ -384,8 +350,20 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(action_common_with_scTIM, QtCore.SIGNAL("triggered()"), lambda:self.set_coloring(6))
         self.connect(action_color_scheme, QtCore.SIGNAL("triggered()"), lambda:self.color_scheme.show())
 
+        viewMenu = menuBar.addMenu("&View")
+        showUI = viewMenu.addAction("&Show Menu")
+        hideUI = viewMenu.addAction("&Hide Menu")
+        self.connect(showUI, QtCore.SIGNAL("triggered()"), self.showUI)
+        self.connect(hideUI, QtCore.SIGNAL("triggered()"), self.hideUI)
+
 
         self.setMenuBar(menuBar)
+    def showUI(self):
+        self.glWidgetD.enableUI()
+        self.glWidgetSC.enableUI()
+    def hideUI(self):
+        self.glWidgetD.disableUI()
+        self.glWidgetSC.disableUI()
 
     def set_sorting(self, n):
         if n == 0:
