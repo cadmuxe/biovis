@@ -93,7 +93,7 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
         #self.glWidgetSC = GLWidget("./data/C7JHB8_ACEP3.B99990002.pdb", self.centralWidget)
-        self.glWidgetSC = PymolQtWidget(self.centralWidget, True, File="./data/C7JHB8_ACEP3.B99990002.pdb")
+        self.glWidgetSC = PymolQtWidget(self.centralWidget, False, File="./data/C7JHB8_ACEP3.B99990002.pdb")
         #self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
         self.glWidgetD = PymolQtWidget(self.centralWidget, False,File="./data/scTIM.pdb")
 
@@ -148,22 +148,22 @@ class MainWindow(QtGui.QMainWindow):
         self.setCentralWidget(self.centralWidget)
         
         # create the event filter
-        self.myEF = MyEventFilter()
+        #self.myEF = MyEventFilter()
          
         # link  to each widgets mouse events
-        self.myEF.pressed.connect(self.pressEvent)
-        self.myEF.moved.connect(self.moveEvent)
-        self.myEF.wheeled.connect(self.myWheelEvent)
+        #self.myEF.pressed.connect(self.pressEvent)
+        #self.myEF.moved.connect(self.moveEvent)
+        #self.myEF.wheeled.connect(self.myWheelEvent)
         
         # link event filter to context menu
-        self.glWidgetSC.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.glWidgetD.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        #self.glWidgetSC.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        #self.glWidgetD.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         
-        self.myEF.context.connect(self.on_context_menu)
+        #self.myEF.context.connect(self.on_context_menu)
         
         # install the new event filter
-        self.glWidgetSC.installEventFilter(self.myEF)
-        self.glWidgetD.installEventFilter(self.myEF)
+        #self.glWidgetSC.installEventFilter(self.myEF)
+        #self.glWidgetD.installEventFilter(self.myEF)
 
         self.color_scheme = ColorWidget()
         self.initActions()
@@ -262,42 +262,42 @@ class MainWindow(QtGui.QMainWindow):
         
     # mouse actions
     def pressEvent(self, event):
-                
+
         self.cursor_pre_x = event.x()
         self.cursor_pre_y = event.y()
         self.cursor_button = event.button()
 
     def moveEvent(self, event):
-        
+
         # why the fuck is this even a thing!?
         if type(event) == QtGui.QMoveEvent:
             return
-                
+
         if self.cursor_button == QtCore.Qt.RightButton or \
                     (self.__key == QtCore.Qt.Key_Shift and self.cursor_button == QtCore.Qt.LeftButton):
             self.glWidgetSC.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
             self.glWidgetD.glv_straif(event.x() - self.cursor_pre_x, self.cursor_pre_y - event.y())
-        
+
         elif self.cursor_button == QtCore.Qt.LeftButton:
-            
+
             self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
             self.glWidgetSC.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-        
+
             self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
             self.glWidgetD.glv_trackball(self.cursor_pre_x, self.cursor_pre_y, event.x(), event.y())
-            
+
         self.cursor_pre_x = event.x()
         self.cursor_pre_y = event.y()
-    
+
     def myWheelEvent(self, event):
-        
+
      # why the fuck is this even a thing!?
         if type(event) == QtGui.QMoveEvent:
             return
-            
+
         self.glWidgetSC.glv_zoom(event.delta())
         self.glWidgetD.glv_zoom(event.delta())
-        
+
     # keyboard actions
         
     def keyPressEvent(self,event):

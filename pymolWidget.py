@@ -36,6 +36,8 @@ class PymolQtWidget(QGLWidget):
             self.pymol.cmd.button("single_right","None","None")
 
         self.pymol.cmd.load(File)
+        self.cmd.show("cartoon")
+        self.cmd.hide("lines")
         self.pymol.reshape(self.width(),self.height())
         self._timer = QtCore.QTimer()
         self._timer.setSingleShot(True)
