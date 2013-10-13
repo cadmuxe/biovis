@@ -82,6 +82,7 @@ self.height()-ev.y(),0)
          #print self.pymol.cmd.get("scTIM", "active_selections")
 
      def mouseReleaseEvent(self, ev):
+         self.cmd.select("resi 3")   # works
          self.pymol.button(self._buttonMap[ev.button()], 1, ev.x(),
 self.height()-ev.y(),0)
          self._pymolProcess()
@@ -111,7 +112,7 @@ self.height()-ev.y(),0)
 class PyMolWidgetDemo(QtGui.QMainWindow):
      def __init__(self):
          QtGui.QMainWindow.__init__(self)
-         widget = PymolQtWidget(self,True,"../data/scTIM.pdb")
+         widget = PymolQtWidget(self,False,"../data/scTIM.pdb")
          self.setCentralWidget(widget)
 
 if __name__ == '__main__':

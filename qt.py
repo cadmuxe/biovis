@@ -7,6 +7,7 @@ from sequenceSet import sequenceSet
 from barcharWidget import barcharWidget
 import MySQLdb as mdb
 import dbinfo as DB
+from pymolWidget import PymolQtWidget
 
 # Class that handles the mouse event filters 
 # to link the views
@@ -91,9 +92,11 @@ class MainWindow(QtGui.QMainWindow):
         self.centralWidget = QtGui.QWidget(self)
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
-        self.glWidgetSC = GLWidget("./data/C7JHB8_ACEP3.B99990002.pdb", self.centralWidget)
-        self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
-                        
+        #self.glWidgetSC = GLWidget("./data/C7JHB8_ACEP3.B99990002.pdb", self.centralWidget)
+        self.glWidgetSC = PymolQtWidget(self.centralWidget, True, File="./data/C7JHB8_ACEP3.B99990002.pdb")
+        #self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
+        self.glWidgetD = PymolQtWidget(self.centralWidget, False,File="./data/scTIM.pdb")
+
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
@@ -319,6 +322,9 @@ class MainWindow(QtGui.QMainWindow):
         self.dTIMList.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.dTIMList.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.dTIMList.verticalScrollBar().valueChanged.connect(self.scTIMList.verticalScrollBar().setValue)
+
+    def update_scTIM_select_pymol(self, list):
+        pass
 
     def update_scTIM_select(self):
         id_list =[]
