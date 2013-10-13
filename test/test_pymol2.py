@@ -112,7 +112,7 @@ self.height()-ev.y(),0)
 class PyMolWidgetDemo(QtGui.QMainWindow):
      def __init__(self):
          QtGui.QMainWindow.__init__(self)
-         widget = PymolQtWidget(self,False,"../data/scTIM.pdb")
+         widget = PymolQtWidget(self,True,"../data/scTIM.pdb")
          self.setCentralWidget(widget)
 
 if __name__ == '__main__':

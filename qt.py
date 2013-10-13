@@ -313,6 +313,7 @@ class MainWindow(QtGui.QMainWindow):
         self.exitAction.setShortcut('Ctrl+Q')
         self.exitAction.setStatusTip('Exit application')
         self.connect(self.exitAction, QtCore.SIGNAL('triggered()'), self.close)
+        self.glWidgetD.register_callback(self.update_dTIM_select_pymol)
 
     def initListWidget(self):
         # scTIMList
@@ -335,6 +336,10 @@ class MainWindow(QtGui.QMainWindow):
             self.dTIMList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
         for i in id_list:
             self.dTIMList.setCurrentRow(i-1,QtGui.QItemSelectionModel.Select)
+    def update_dTIM_select_pymol(self,l):
+        for item in l:
+            self.dTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
+
 
     def initMenus(self):
         menuBar = self.menuBar()
@@ -378,6 +383,7 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(action_side_chain_solvent, QtCore.SIGNAL("triggered()"), lambda: self.set_coloring(5))
         self.connect(action_common_with_scTIM, QtCore.SIGNAL("triggered()"), lambda:self.set_coloring(6))
         self.connect(action_color_scheme, QtCore.SIGNAL("triggered()"), lambda:self.color_scheme.show())
+
 
         self.setMenuBar(menuBar)
 

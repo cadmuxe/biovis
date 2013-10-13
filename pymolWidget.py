@@ -44,6 +44,17 @@ class PymolQtWidget(QGLWidget):
         #globalSettings.settingsChanged.connect(self._updateGlobalSettings)
         self._updateGlobalSettings()
 
+    def enableUI(self):
+        self.pymol.cmd.set("internal_gui",1)
+        self.pymol.cmd.set("internal_feedback",1)
+        self.pymol.cmd.button("double_left","None","None")
+        self.pymol.cmd.button("single_right","None","None")
+    def disableUI(self):
+        self.pymol.cmd.set("internal_gui",0)
+        self.pymol.cmd.set("internal_feedback",0)
+        self.pymol.cmd.button("double_left","None","None")
+        self.pymol.cmd.button("single_right","None","None")
+
     def __del__(self):
         pass
 
@@ -94,6 +105,7 @@ self.height()-ev.y(),0)
             except ValueError:
                 l.append(i)
         self._call_selected(l)
+        print "HI got it!"
 
     def resizeGL(self, w, h):
         self.pymol.reshape(w,h, True)
