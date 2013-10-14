@@ -19,7 +19,7 @@ import pymol
 from pymol import _cmd
 __main__.pymol = pymol
 
-from pymol import selector
+from pymol import selector, parser
 import pymol.menu
 import pymol.povray
 from copy import deepcopy
@@ -43,13 +43,13 @@ class PyMOL:
             self.invocation = self._invocation
 
             options = self.invocation.options
-
+            
             if scheme!=None: #
                 if scheme == 'presentation':
                     options.quiet = 0
                     options.show_splash = 0
                     options.external_gui = 0
-                    options.internal_feedback = 0
+                    options.internal_feedback = 1
                     options.no_quit = 1
                     options.internal_gui = 0
                     options.presentation = 1
@@ -67,7 +67,7 @@ class PyMOL:
             # initialize the cmd API
 
             self.cmd = Cmd(self,self._COb)
-            
+            #self.parser = pymol.parser.Parser(self.cmd)
             # begin assembling the instance member by member
 
             # key instance methods
@@ -104,7 +104,7 @@ class PyMOL:
             self.chempy = pymol.chempy
             self.bonds = pymol.bonds
             self.models = pymol.models
-                
+            self.parser = pymol.parser.Parser(self.cmd)
         except:
             traceback.print_exc()            
             pymol2_lock.release()
@@ -138,7 +138,7 @@ class PyMOL:
         _cmd._button(self._COb,button,state,x,y,modifiers)
 
     def drag(self,x,y,modifiers):
-        _cmd._drag(self._COb,x,y,modifiers)
-
-        
+        _cmd._drag(self._COb,x,y,modifiers)  
     
+    def parsing(self,key):
+        _cmd.parsing(key)

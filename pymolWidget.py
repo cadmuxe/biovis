@@ -51,9 +51,12 @@ class PymolQtWidget(QGLWidget):
         self.cmd = self.pymol.cmd
         # self.toPymolName = self.pymol.toPymolName ### Attribute Error
         self._pymolProcess()
+        self.setFocusPolicy(Qt.ClickFocus)
+        #self.Parser = self.
+
         if not self._enableUi:
             self.pymol.cmd.set("internal_gui",0)
-            self.pymol.cmd.set("internal_feedback",0)
+            self.pymol.cmd.set("internal_feedback",1)
             self.pymol.cmd.button("double_left","None","None")
             self.pymol.cmd.button("single_right","None","None")
 
@@ -75,20 +78,18 @@ class PymolQtWidget(QGLWidget):
         define_color(self.cmd.set_color)
 
     def enableUI(self):
-        self.pymol.cmd.set("internal_gui",1)
+        #self.pymol.cmd.set("internal_gui",1)
         self.pymol.cmd.set("internal_feedback",1)
         self.pymol.cmd.button("double_left","None","None")
         self.pymol.cmd.button("single_right","None","None")
         self.resizeGL(self.width(),self.height())
 
     def disableUI(self):
-        self.pymol.cmd.set("internal_gui",0)
+        #self.pymol.cmd.set("internal_gui",0)
         self.pymol.cmd.set("internal_feedback",0)
         self.pymol.cmd.button("double_left","None","None")
         self.pymol.cmd.button("single_right","None","None")
         self.resizeGL(self.width(),self.height())
-
-
 
     def __del__(self):
         pass
@@ -110,7 +111,11 @@ class PymolQtWidget(QGLWidget):
         #self.pymol.cmd.set("_stencil_parity", bottom & 0x1)
         self._doIdle()
         self.pymol.draw()
-
+    def keyPressEvent(self, ev):
+        print ev.key()
+        pymol2.PyMOL.parse(ev.key())
+        pass
+    
     def mouseMoveEvent(self, ev):
         self.pymol.drag(ev.x(), self.height()-ev.y(),0)
         self._pymolProcess()

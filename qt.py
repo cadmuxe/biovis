@@ -44,8 +44,8 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self)#, None, QtCore.Qt.WindowStaysOnTopHint)
             
         self.setWindowTitle("2013 BioVis Contest")
-        self.resize(1280, 1024)
-        #self.resize(640, 512)
+        #self.resize(1280, 1024)
+        self.resize(640, 512)
         
         info = DB.getInfo()
         self.db = None
