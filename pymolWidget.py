@@ -9,6 +9,28 @@ import pymol2
 
 
 
+residues_class = [('RRG','LYS','ASP','GLU'),
+                  ('GLN','ASN','HIS','SER','THR','TYR','CYS','MET','TRP'),
+                  ('ALA','ILE','LEU','PHE','VAL','PRO','GLY')]
+
+def get_color(resn):
+    colours = ['red', 'green', 'blue', 'yellow', 'violet', 'cyan',    \
+            'salmon', 'lime', 'pink', 'slate', 'magenta', 'orange', 'marine', \
+            'olive', 'purple', 'teal', 'forest', 'firebrick', 'chocolate',    \
+            'wheat', 'white', 'grey' ]
+    if resn in residues_class[0]:
+        return 'olive'
+    elif resn in residues_class[1]:
+        return 'marine'
+    else:
+        return "firebrick"
+
+def define_color(set_color):
+    set_color("c1",[0.698, 0.094, 0.168])
+    set_color("c2",[0.129, 0.4, 0.674])
+    set_color("c3", [0.93, 0.541, 0.384])
+
+
 class PymolQtWidget(QGLWidget):
     _buttonMap = {Qt.LeftButton:0,
                   Qt.MidButton:1,
@@ -37,9 +59,10 @@ class PymolQtWidget(QGLWidget):
 
         self.pymol.cmd.load(File)
         self.cmd.show("cartoon")
-        self.cmd.cartoon("putty")
+        #self.cmd.cartoon("putty")
         self.cmd.set("cartoon_highlight_color", 1)
         self.cmd.hide("lines")
+        #self.cmd.hide("chain ")
         self.color_obj(0)
         #self.cmd.color("marine")
         self.pymol.reshape(self.width(),self.height())
@@ -49,6 +72,7 @@ class PymolQtWidget(QGLWidget):
         self.resizeGL(self.width(),self.height())
         #globalSettings.settingsChanged.connect(self._updateGlobalSettings)
         self._updateGlobalSettings()
+        define_color(self.cmd.set_color)
 
     def enableUI(self):
         self.pymol.cmd.set("internal_gui",1)
@@ -108,7 +132,7 @@ self.height()-ev.y(),0)
         self._timer.start(0)
         my_dict={"list":[]}
         self.cmd.iterate("(sele)","list.append((resi,resn))",space=my_dict)
-        print my_dict["list"]
+        #print my_dict["list"]
         l=[]
         for i in my_dict["list"]:
             try:
@@ -116,7 +140,6 @@ self.height()-ev.y(),0)
             except ValueError:
                 l.append(i)
         self._call_selected(l)
-        print "HI got it!"
 
     def resizeGL(self, w, h):
         self.pymol.reshape(w,h, True)
@@ -139,7 +162,17 @@ self.height()-ev.y(),0)
         self.cmd.show("sticks", "(resi %d)"%resi_id)
         self._pymolProcess()
         self.update()
-
+    def get_all_resi(self):
+        my_dict={"list":[]}
+        n = self.cmd.get_names()
+        self.cmd.iterate("(%s)"% n[0],"list.append((resi,resn))",space=my_dict)
+        l=[]
+        for i in my_dict["list"]:
+            try:
+                l.index(i)
+            except ValueError:
+                l.append(i)
+        return l
     def color_obj(self,rainbow=0):
         """
 
@@ -168,7 +201,6 @@ SEE ALSO
         obj_list = self.cmd.get_names('objects')
 
         if rainbow:
-            print "\nColouring objects as rainbow\n"
 
             nobj = len(obj_list)
 
@@ -180,13 +212,11 @@ SEE ALSO
                 rgb = hsv_to_rgb(hsv)
                 # Define the new colour
                 self.cmd.set_color("col" + str(j), rgb)
-                print obj_list[j], rgb
                 # Colour the object
                 self.cmd.color("col" + str(j), obj_list[j])
 
         else:
 
-            print "\nColouring objects using PyMOL defined colours\n"
 
            # List of available colours
             colours = ['red', 'green', 'blue', 'yellow', 'violet', 'cyan',    \
@@ -194,12 +224,11 @@ SEE ALSO
             'olive', 'purple', 'teal', 'forest', 'firebrick', 'chocolate',    \
             'wheat', 'white', 'grey' ]
             ncolours = len(colours)
-
+            all_residues = self.get_all_resi()
             # Loop over objects
             i = 0
-            for obj in range(200):
-                print "  ", obj, colours[i]
-                self.cmd.color(colours[i], "resi %d"%obj)
+            for obj in all_residues:
+                self.cmd.color(get_color(obj[1]), "resi %s"%obj[0])
                 i = i+1
                 if(i == ncolours):
                     i = 0

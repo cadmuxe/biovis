@@ -305,6 +305,8 @@ class MainWindow(QtGui.QMainWindow):
             self.scTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
             self.glWidgetSC.show_resi(int(item[0]))
             self.glWidgetD.show_resi(int(item[0]))
+            self.TIMs.move_scroll_to_resi(int(item[0]))
+            self.barchar.update()
 
 
     def initMenus(self):

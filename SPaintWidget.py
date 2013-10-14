@@ -208,6 +208,16 @@ class MyPaintWidget(QtGui.QWidget):
             self.__scroll_button_position_hor = 1.0
         print self.__scroll_button_position_hor,self.sequences["max_len_frag"]
 
+    def move_scroll_to_resi(self, resi_id):
+        print (resi_id, self.sequences["max_len_frag"])
+        d = resi_id/ float(self.sequences["max_len_frag"])
+        self.__scroll_button_position_hor = d
+        if self.__scroll_button_position_hor<0:
+            self.__scroll_button_position_hor = 0.0
+        elif self.__scroll_button_position_hor > 1.0:
+            self.__scroll_button_position_hor = 1.0
+        self.update()
+
     def mouseMoveEvent(self,event):
         x,y = event.x(),event.y()
 

@@ -27,8 +27,6 @@ class sequence(object):
         return iter(self.__seq)
 
 
-
-
 class sequenceSet(object):
     """
     Set of sequences

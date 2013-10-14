@@ -8,7 +8,7 @@ from PySide.QtCore import Qt
 from PySide import QtCore
 
 import pymol2
-
+import pymol
 
 
 class PymolQtWidget(QGLWidget):
@@ -36,6 +36,7 @@ class PymolQtWidget(QGLWidget):
              self.pymol.cmd.set("internal_feedback",0)
              self.pymol.cmd.button("double_left","None","None")
              self.pymol.cmd.button("single_right","None","None")
+         self.internal = pymol.internal
 
          self.pymol.cmd.load(File)
          self.pymol.reshape(self.width(),self.height())
@@ -45,6 +46,8 @@ class PymolQtWidget(QGLWidget):
          self.resizeGL(self.width(),self.height())
          #globalSettings.settingsChanged.connect(self._updateGlobalSettings)
          self._updateGlobalSettings()
+         self.setFocusPolicy(Qt.ClickFocus)
+
 
      def __del__(self):
          pass
@@ -106,6 +109,10 @@ self.height()-ev.y(),0)
      def _doIdle(self):
          if self.pymol.idle():
              self._timer.start(0)
+     def keyPressEvent(self, event):
+         #self.internal._alt(event.text(), self.pymol.cmd)
+         pymol._cmd.p_glut_event(5,0,0,event.key(),0,self.ep_mod)
+
 
 
 
