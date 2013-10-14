@@ -126,6 +126,15 @@ class ListWidget(QtGui.QListWidget):
     def __init__(self,text, parent = None):
         QtGui.QListWidget.__init__(self, parent)
         self.setSelectionMode(QtGui.QAbstractItemView.MultiSelection)
+        self.setStyleSheet( """ QListWidget:item:selected:active {
+                                     background: orange;
+                                }
+                                QListWidget:item:selected:!active {
+                                     background: orange;
+                                }
+                                """
+                                )
+        self.setFocusPolicy(Qt.NoFocus)
 
 class ListWidgetItem(QtGui.QListWidgetItem):
     def __init__(self, text , parent, frag_id=None):

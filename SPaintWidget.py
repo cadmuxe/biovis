@@ -55,7 +55,8 @@ class MyPaintWidget(QtGui.QWidget):
         self.__scroll_button_position = 0.0
         self.cursor_button = QtCore.Qt.MouseButton.NoButton
 
-        self.__scroll_button_position_hor = 0.0
+        self.__scroll_button_position_horA = 0.0
+        self.__scroll_button_position_horB = 1.0
         self.__horizontal_selection_element_num = 5
 
     def __update_size_info(self):
@@ -141,13 +142,21 @@ class MyPaintWidget(QtGui.QWidget):
                 self.__scrollbar_width,self.__scroll_button_height)
 
         # draw outline of horizontal scroll button
-        painter.drawRect((self.__TIMs_cache_width-self.__scrollabr_button_width_hor)*self.__scroll_button_position_hor, 0,
-                self.__scrollabr_button_width_hor,self.__TIMs_cache_height)
-        painter.drawPixmap((self.__TIMs_cache_width-self.__scrollabr_button_width_hor)*self.__scroll_button_position_hor, 0,
+        painter.drawRect((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horA, 0,
+                self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
+        painter.drawPixmap((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horA, 0,
                 self.__TIMs_cache,
-               (self.__TIMs_cache_width-self.__scrollabr_button_width_hor)*self.__scroll_button_position_hor,
+               (self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horA,
                (self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position,
-                self.__scrollabr_button_width_hor,self.__TIMs_cache_height)
+                self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
+
+        painter.drawRect((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horB, 0,
+                self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
+        painter.drawPixmap((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horB, 0,
+                self.__TIMs_cache,
+               (self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horB,
+               (self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position,
+                self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
 
 
         # draw a rectangle on current mouse position
@@ -176,10 +185,14 @@ class MyPaintWidget(QtGui.QWidget):
         self.cursor_pre_y = event.y()
         self.cursor_button = event.button()
         if self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
-            if (self.__TIMs_cache_width - self.__scrollabr_button_width_hor) * self.__scroll_button_position_hor < x \
-                        < ((self.__TIMs_cache_width - self.__scrollabr_button_width_hor) * self.__scroll_button_position_hor + self.__scrollabr_button_width_hor) \
+            if (self.__TIMs_cache_width - self.__scrollabr_button_width_hor*0.5) * self.__scroll_button_position_horA < x \
+                        < ((self.__TIMs_cache_width - self.__scrollabr_button_width_hor*0.5) * self.__scroll_button_position_horA + self.__scrollabr_button_width_hor*0.5) \
                 and x < self.__scrollbar_postion_x:
-                self.hit = "hor"
+                self.hit = "horA"
+            elif (self.__TIMs_cache_width - self.__scrollabr_button_width_hor*0.5) * self.__scroll_button_position_horB < x \
+                        < ((self.__TIMs_cache_width - self.__scrollabr_button_width_hor*0.5) * self.__scroll_button_position_horB + self.__scrollabr_button_width_hor*0.5) \
+                and x < self.__scrollbar_postion_x:
+                self.hit = "horB"
             # sequences selection
             else:
                 self.hit = "seq"
@@ -200,22 +213,29 @@ class MyPaintWidget(QtGui.QWidget):
             self.__scroll_button_position = 0.0
         elif self.__scroll_button_position > 1.0:
             self.__scroll_button_position = 1.0
-    def update_scroll_hor(self,dx):
-        self.__scroll_button_position_hor +=dx
-        if self.__scroll_button_position_hor<0:
-            self.__scroll_button_position_hor = 0.0
-        elif self.__scroll_button_position_hor > 1.0:
-            self.__scroll_button_position_hor = 1.0
-        print self.__scroll_button_position_hor,self.sequences["max_len_frag"]
+    def update_scroll_horA(self,dx):
+        self.__scroll_button_position_horA +=dx
+        if self.__scroll_button_position_horA<0:
+            self.__scroll_button_position_horA = 0.0
+        elif self.__scroll_button_position_horA > 1.0:
+            self.__scroll_button_position_horA = 1.0
+        print self.__scroll_button_position_horA,self.sequences["max_len_frag"]
+    def update_scroll_horB(self,dx):
+        self.__scroll_button_position_horB +=dx
+        if self.__scroll_button_position_horB<0:
+            self.__scroll_button_position_horB = 0.0
+        elif self.__scroll_button_position_horB > 1.0:
+            self.__scroll_button_position_horB = 1.0
+        print self.__scroll_button_position_horB,self.sequences["max_len_frag"]
 
     def move_scroll_to_resi(self, resi_id):
         print (resi_id, self.sequences["max_len_frag"])
         d = resi_id/ float(self.sequences["max_len_frag"])
-        self.__scroll_button_position_hor = d
-        if self.__scroll_button_position_hor<0:
-            self.__scroll_button_position_hor = 0.0
-        elif self.__scroll_button_position_hor > 1.0:
-            self.__scroll_button_position_hor = 1.0
+        self.__scroll_button_position_horB = d
+        if self.__scroll_button_position_horB<0:
+            self.__scroll_button_position_horB = 0.0
+        elif self.__scroll_button_position_horB > 1.0:
+            self.__scroll_button_position_horB = 1.0
         self.update()
 
     def mouseMoveEvent(self,event):
@@ -223,9 +243,12 @@ class MyPaintWidget(QtGui.QWidget):
 
         if self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
             # fragment selection
-            if self.hit == "hor":
+            if self.hit == "horA":
                 d = (x-self.cursor_pre_x) * 1.0 / self.__TIMs_cache_width
-                self.update_scroll_hor(d)
+                self.update_scroll_horA(d)
+            elif self.hit == "horB":
+                d = (x-self.cursor_pre_x) * 1.0 / self.__TIMs_cache_width
+                self.update_scroll_horB(d)
             # sequences selection
             elif self.hit == "seq":
                 self.on_sequences_id = int(y+(self.__TIMs_cache_height-self.__widget_height)* \
@@ -251,9 +274,12 @@ class MyPaintWidget(QtGui.QWidget):
             self.update()
         self.cursor_pre_x = x
         self.cursor_pre_y = y
-        self.__callback["barchar"](int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num)* self.__scroll_button_position_hor),
-                                    int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num)* self.__scroll_button_position_hor + self.__horizontal_selection_element_num),
-                                   self.on_sequences_id,self.on_frag_id)
+
+        rAf = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horA)
+        rAt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horA + int(self.__horizontal_selection_element_num*0.5)+1)
+        rBf = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB)
+        rBt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB + int(self.__horizontal_selection_element_num*0.5)+1)
+        self.__callback["barchar"](rAf,rAt,rBf,rBt,self.on_sequences_id,self.on_frag_id)
 
 
 

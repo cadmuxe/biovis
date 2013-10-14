@@ -150,7 +150,7 @@ class MainWindow(QtGui.QMainWindow):
         self.initListWidget()
         self.initTIMs()
         self.initMenus()
-        self.barchar.update_sequences(0, 9, "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] )
+        self.barchar.update_sequences(zip(range(9), "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] ))
         
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
         
@@ -293,7 +293,6 @@ class MainWindow(QtGui.QMainWindow):
         id_list =[]
         for item in self.scTIMList.selectedItems():
             id_list.append(item.get_fragment_id())
-        self.glWidgetSC.update_select(id_list)
         for item in self.dTIMList.selectedItems():
             self.dTIMList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
         for i in id_list:
@@ -484,18 +483,33 @@ class MainWindow(QtGui.QMainWindow):
     def close(self):
         QtGui.qApp.quit()
 
-    def barchar_update(self, selection_f, selection_t, seqid, fragid):
+    def barchar_update(self, selection_f, selection_t,fB,tB, seqid, fragid):
         seq = self.__sequenceSet[seqid].seq
         #frag_from, frag_to = selection_f, selection_t
+        def helper(x):
+            if x>len(seq):
+                x = len(seq)-1
+            if x<0:
+                x =0
+            return x
         frag_from, frag_to = selection_f - 5, selection_t + 5
-        if frag_to > len(seq):
-            frag_to = len(seq)
-        if frag_from > len(seq):
-            frag_from = len(seq)
+        ffb, ftb = fB-5, tB+5
+        frag_to = helper(frag_to)
+        frag_from =helper(frag_from)
+        ftb = helper(ftb)
+        ffb = helper(ffb)
+
+        Aids = range(frag_from,frag_to+1)
+        Bids = range(ffb, ftb+1)
+
+        Aresi = [seq[i] for i in Aids]
+        Bresi = [seq[i] for i in Bids]
+
+        Afre = [self.__sequenceSet.frag_frequency[i][seq[i]]/float(len(self.__sequenceSet)) if seq[i] !='-' else 0.0   for i in Aids]
+        Bfre = [self.__sequenceSet.frag_frequency[i][seq[i]]/float(len(self.__sequenceSet)) if seq[i] !='-' else 0.0   for i in Bids]
+
         
-        frequency = [self.__sequenceSet.frag_frequency[i][seq[i]]/float(len(self.__sequenceSet)) if seq[i] !='-' else 0.0   for i in range(frag_from, frag_to)]
-        self.barchar.update_sequences(frag_from, frag_to, seq[frag_from: frag_to],
-                                      frequency)
+        self.barchar.update_sequences(zip(Aids+Bids, Aresi+Bresi, Afre+Bfre))
 
 app = QtGui.QApplication(sys.argv)
 

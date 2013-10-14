@@ -16,11 +16,11 @@ class barcharWidget(QtGui.QWidget):
 
         self.cal_size()
 
-    def update_sequences(self, frag_id_from, frag_id_to, frags, barchar_data):
+    def update_sequences(self, data):
         """
         """
         # (frag_id, frag, barchar_data)
-        self.frags = zip(range(frag_id_from, frag_id_to + 1), frags, barchar_data)
+        self.frags = data
         self.cal_size()
         self.update()
 
