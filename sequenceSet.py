@@ -83,7 +83,7 @@ class sequenceSet(object):
                 if s =='-':
                     cl.append(color.gray)
                 else:
-                    cl.append(color.black)
+                    cl.append(color.tetrad_red)
             self.__color.append(cl)
 
     def frequencyColor(self):
@@ -103,9 +103,9 @@ class sequenceSet(object):
                         fcolor = color.gray
                     elif self.__sequence[seq_id][frag_id] == self.max_frag_frequency[frag_id][1]:
                         # coloring the largest frequency fragment in the column
-                        fcolor = color.red
+                        fcolor = color.tetrad_red
                     else:
-                        fcolor = color.black
+                        fcolor = color.white
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
@@ -120,22 +120,22 @@ class sequenceSet(object):
                         fcolor = color.gray
                     elif self.__sequence[seq_id][frag_id].upper() in ('G','A','V','L','I'):
                         # Aliphatic
-                        fcolor = color.c1
+                        fcolor = color.tetrad_red
                     elif self.__sequence[seq_id][frag_id].upper() in ('S','C','T','M'):
                         # HS
-                        fcolor = color.c2
+                        fcolor = color.tetrad_yellow
                     elif self.__sequence[seq_id][frag_id].upper() in ('P'):
                         # Cyclic
-                        fcolor = color.c3
+                        fcolor = color.tetrad_green
                     elif self.__sequence[seq_id][frag_id].upper() in ('F','W','Y'):
                         # Aromatic
-                        fcolor = color.c4
+                        fcolor = color.tetrad_blue
                     elif self.__sequence[seq_id][frag_id].upper() in ('H','K','R'):
                         # Basic
-                        fcolor = color.c5
+                        fcolor = color.white
                     elif self.__sequence[seq_id][frag_id].upper() in ('D','E','N','Q'):
                         #AA
-                        fcolor = color.c6
+                        fcolor = color.pink
                     else:
                         fcolor = color.black
                     self.__color[seq_id].append(fcolor)
@@ -152,16 +152,16 @@ class sequenceSet(object):
                         fcolor = color.gray
                     elif self.__sequence[seq_id][frag_id].upper() in ('A','C','G','I','L','M','F','P','W','V'):
                         # Nonpolar
-                        fcolor = color.c1
+                        fcolor = color.tetrad_red
                     elif self.__sequence[seq_id][frag_id].upper() in ('R','H','K'):
                         # Basic polar
-                        fcolor = color.c2
+                        fcolor = color.white
                     elif self.__sequence[seq_id][frag_id].upper() in ('N','Q','S','T','Y'):
                         # Polar
-                        fcolor = color.c3
+                        fcolor = color.tetrad_blue
                     elif self.__sequence[seq_id][frag_id].upper() in ('D','E'):
                         # Acidic polar
-                        fcolor = color.c4
+                        fcolor = color.tetrad_green
                     else:
                         fcolor = color.black
                     self.__color[seq_id].append(fcolor)
@@ -178,13 +178,13 @@ class sequenceSet(object):
                         fcolor = color.gray
                     elif self.__sequence[seq_id][frag_id].upper() in ('A','N','C','Q','G','H','I','L','M','F','P','S','T','W','Y','V'):
                         # Neutral
-                        fcolor = color.c1
+                        fcolor = color.white
                     elif self.__sequence[seq_id][frag_id].upper() in ('R','K'):
                         # Positive
-                        fcolor = color.c2
+                        fcolor = color.tetrad_red
                     elif self.__sequence[seq_id][frag_id].upper() in ('D','E'):
                         # Negative
-                        fcolor = color.c3
+                        fcolor = color.tetrad_blue
                     else:
                         fcolor = color.black
                     self.__color[seq_id].append(fcolor)
@@ -201,13 +201,13 @@ class sequenceSet(object):
                         fcolor = color.gray
                     elif self.__sequence[seq_id][frag_id].upper() in ('R','K','D','E'):
                         # Charged
-                        fcolor = color.c1
+                        fcolor = color.tetrad_red
                     elif self.__sequence[seq_id][frag_id].upper() in ('Q','N','H','S','T','Y','C','M','W'):
                         # Polar
-                        fcolor = color.c2
+                        fcolor = color.tetrad_blue
                     elif self.__sequence[seq_id][frag_id].upper() in ('A','I','L','F','V','P','G'):
                         # Hydrophobic
-                        fcolor = color.c3
+                        fcolor = color.tetrad_green
                     else:
                         fcolor = color.black
                     self.__color[seq_id].append(fcolor)
@@ -226,9 +226,9 @@ class sequenceSet(object):
                         fcolor = color.gray
                     elif frag_id in selections.keys():
                         if self.__sequence[seq_id][frag_id] == selections[frag_id]:
-                            fcolor = color.c1
+                            fcolor = color.tetrad_red
                         else:
-                            fcolor = color.black
+                            fcolor = color.white
                     else:
                         fcolor = color.black
                     self.__color[seq_id].append(fcolor)

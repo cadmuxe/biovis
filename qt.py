@@ -115,8 +115,8 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout.addWidget(self.TIMs, 2, 0, 1, 4)
         self.gridlayout.addWidget(self.barchar, 3, 0, 1, 4)
 
-        self.gridlayout.setColumnStretch(0,20)
-        self.gridlayout.setColumnStretch(1,20)
+        self.gridlayout.setColumnStretch(0,15)
+        self.gridlayout.setColumnStretch(1,15)
         self.gridlayout.setColumnStretch(2,1)
         self.gridlayout.setColumnStretch(3,1)
 
@@ -150,7 +150,7 @@ class MainWindow(QtGui.QMainWindow):
         self.initListWidget()
         self.initTIMs()
         self.initMenus()
-        self.barchar.update_sequences(zip(range(9), "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] ))
+        self.barchar.update_sequences(zip(range(9), "ADGDEDSFE",[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9] ), 5,4)
         
         self.TIMs.registerClickCallBack({"name":"barchar","func":self.barchar_update})
         
@@ -304,9 +304,8 @@ class MainWindow(QtGui.QMainWindow):
             self.scTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
             self.glWidgetSC.show_resi(int(item[0]))
             self.glWidgetD.show_resi(int(item[0]))
-            self.TIMs.move_scroll_to_resi(int(item[0]))
-            self.barchar.update()
 
+        self.TIMs.move_scroll_to_resi(int(l[-1][0]))
 
     def initMenus(self):
         menuBar = self.menuBar()
@@ -509,7 +508,7 @@ class MainWindow(QtGui.QMainWindow):
         Bfre = [self.__sequenceSet.frag_frequency[i][seq[i]]/float(len(self.__sequenceSet)) if seq[i] !='-' else 0.0   for i in Bids]
 
         
-        self.barchar.update_sequences(zip(Aids+Bids, Aresi+Bresi, Afre+Bfre))
+        self.barchar.update_sequences(zip(Aids+Bids, Aresi+Bresi, Afre+Bfre), len(Aids), len(Bids))
 
 app = QtGui.QApplication(sys.argv)
 
