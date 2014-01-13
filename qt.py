@@ -52,11 +52,11 @@ class MainWindow(QtGui.QMainWindow):
         
         try:
             # Open database connection
-            # self.db = mdb.connect( info["host"], info["username"],
-            #     info["password"], info["dbName"])
+            self.db = mdb.connect( info["host"], info["username"],
+                info["password"], info["dbName"])
             # 
-            # # prepare a cursor object using cursor() method
-            # self.cursor = self.db.cursor()
+            # prepare a cursor object using cursor() method
+            self.cursor = self.db.cursor()
             # 
             # sql = """SELECT l.FASTA FROM lookup l WHERE l.PDB ='2YPI' """
             # self.cursor.execute(sql)
@@ -173,7 +173,7 @@ class MainWindow(QtGui.QMainWindow):
         fasta =  self.selected_sequence_name[:6]
         model = 0
         
-        sql = "SELECT l.PDB, l.MODEL FROM lookup l WHERE l.FASTA = "
+        sql = "SELECT l.PDBCode, l.ModelID FROM modbase l WHERE l.FASTA = "
         sql += """'""" + fasta + """'"""
         
         self.cursor.execute(sql)

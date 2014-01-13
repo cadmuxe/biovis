@@ -10,6 +10,7 @@ def hash(plate, mjd, fiberID):
 info = DB.getInfo()
 
 db = None
+cursor = None
 
 try:
 	# Open database connection
@@ -55,6 +56,7 @@ finally:
             ModPipeQualityScore FLOAT DEFAULT 0.0,
             ZDopeScore FLOAT DEFAULT 0.0,
             ModelDate varchar(10) NOT NULL,
+            FASTA varchar(6) NOT NULL,
 		    PRIMARY KEY (SequenceID, PDBCode, ModelDate) )"""
 
     cursor.execute(table)    
@@ -105,9 +107,9 @@ finally:
             #print values[-2]            
             sql = """INSERT INTO modbase (RUNTYPE, CRC, SequenceID, ModelID, TargetBeg, """
             sql += """TargetEnd, PDBCode, PDBChain, PDBBegin, PDBEnd, SeqId, Evalue, ModelScore, """
-            sql += """ModPipeQualityScore, ZDopeScore, ModelDate) VALUES (""" 
+            sql += """ModPipeQualityScore, ZDopeScore, ModelDate, FASTS) VALUES (""" 
             sql += values[:-2] 
-            sql += """)""" 
+            sql += """,'')""" 
             
             #print sql
             
