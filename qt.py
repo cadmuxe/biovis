@@ -178,7 +178,7 @@ class MainWindow(QtGui.QMainWindow):
         
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
-        
+                
         # create context menu content
         timMenu = QtGui.QMenu(self)
         

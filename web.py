@@ -33,7 +33,6 @@ class Browser(QWebView):
         print self.PDB + " " + self.FASTA
         
         self.loadFinished.connect(self._result_available)
-        
 
     def _result_available(self, ok):
         frame = self.page().mainFrame()

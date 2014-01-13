@@ -30,8 +30,6 @@ class color(object):
     pink = QtGui.QColor(253, 219, 199)
 
 
-
-
     @staticmethod
     def  random(not_color):
         """
