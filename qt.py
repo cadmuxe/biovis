@@ -300,6 +300,7 @@ class MainWindow(QtGui.QMainWindow):
             self.dTIMList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
         for i in id_list:
             self.dTIMList.setCurrentRow(i-1,QtGui.QItemSelectionModel.Select)
+        self.glWidgetD.selectResidue(id_list)
 
     def update_dTIM_select_pymol(self,l):
         for item in l:
@@ -473,7 +474,7 @@ class MainWindow(QtGui.QMainWindow):
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
 
         # load TIMs, and coloring them and update for darwing
-        self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa")
+        self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa" , pymol = self.glWidgetD)
         self.__sequenceSet.loadscTIMFromFile("data/scTIM.fa")
         self.current_sortting={"func":"", "name":"Haven't been sorted"}
         self.current_coloring ={"func":self.__sequenceSet.frequencyColor, "name":"Frequency coloring"}

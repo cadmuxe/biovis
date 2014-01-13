@@ -4,6 +4,18 @@ from SPaintWidget import color
 from LevenshteinDistance import LevenshteinDistance as LeveDist
 from sequenceCounter import sequenceCounter
 
+def UR(tri):
+    protein = {"GLY":"G", "ALA":"A", "VAL":"V", "LEU":"L",
+        "ILE":"I", "PHE":"F", "TRP":"W", "TYR":"Y",
+        "ASP":"D", "HIS":"H", "ASN":"N", "GLU":"E",
+        "LYS":"K", "GLN":"Q", "MET":"M", "ARG":"R",
+        "SER":"S", "THR":"T", "CYS":"C", "PRO":"P"
+    }
+    try:
+        return protein[tri]
+    except:
+        return '-'
+
 class sequence(object):
     """
     sequence
@@ -31,7 +43,7 @@ class sequenceSet(object):
     """
     Set of sequences
     """
-    def __init__(self, TIMs_filename=None, scTIM_filename=None):
+    def __init__(self, TIMs_filename=None, scTIM_filename=None, pymol = None):
 
         self.__sequence=[]
         self.__color = None
@@ -39,6 +51,7 @@ class sequenceSet(object):
             self.loadTIMsFromFile(TIMs_filename)
         if scTIM_filename is not None:
             self.loadscTIMFromFile(scTIM_filename)
+        self.pymol = pymol
 
     def loadTIMsFromFile(self,filename):
         f = open(filename)
@@ -109,6 +122,17 @@ class sequenceSet(object):
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
+        all_resi = self.pymol.get_all_resi()
+        for resid in range(len(all_resi)):
+            try:
+                if UR(all_resi[resid][1]) == '-':
+                    pass
+                elif UR(all_resi[resid][1]) == self.max_frag_frequency[resid][1]:
+                    self.pymol.setColor(all_resi[resid][0], "red")
+                else:
+                    self.pymol.setColor(all_resi[resid][0], "white")
+            except:
+                self.pymol.setColor(all_resi[resid][0], "white")
         return
     def color_general_chemical(self):
         # initialize __color to store result
@@ -141,6 +165,24 @@ class sequenceSet(object):
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
+        all_resi = self.pymol.get_all_resi()
+        for resid in range(len(all_resi)):
+            if UR(all_resi[resid][1]) == '-':
+                pass
+            elif UR(all_resi[resid][1]) in ('G','A','V','L','I'):
+                self.pymol.setColor(all_resi[resid][0], "red")
+            elif UR(all_resi[resid][1]) in ('S','C','T','M'):
+                self.pymol.setColor(all_resi[resid][0], "yellow")
+            elif UR(all_resi[resid][1]) in ('P'):
+                self.pymol.setColor(all_resi[resid][0], "green")
+            elif UR(all_resi[resid][1]) in ('F','W','Y'):
+                self.pymol.setColor(all_resi[resid][0], "blue")
+            elif UR(all_resi[resid][1]) in ('H','K','R'):
+                self.pymol.setColor(all_resi[resid][0], "white")
+            elif UR(all_resi[resid][1]) in ('D','E','N','Q'):
+                self.pymol.setColor(all_resi[resid][0], "pink")
+            else:
+                self.pymol.setColor(all_resi[resid][0], "black")
         return
     def color_side_chain_polarity(self):
         # initialize __color to store result
@@ -167,6 +209,20 @@ class sequenceSet(object):
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
+        all_resi = self.pymol.get_all_resi()
+        for resid in range(len(all_resi)):
+            if UR(all_resi[resid][1]) == '-':
+                pass
+            elif UR(all_resi[resid][1]) in ('A','C','G','I','L','M','F','P','W','V'):
+                self.pymol.setColor(all_resi[resid][0], "red")
+            elif UR(all_resi[resid][1]) in ('R','H','K'):
+                self.pymol.setColor(all_resi[resid][0], "white")
+            elif UR(all_resi[resid][1]) in ('N','Q','S','T','Y'):
+                self.pymol.setColor(all_resi[resid][0], "blue")
+            elif UR(all_resi[resid][1]) in ('D','E'):
+                self.pymol.setColor(all_resi[resid][0], "green")
+            else:
+                self.pymol.setColor(all_resi[resid][0], "black")
         return
     def color_side_chain_charge(self):
         # initialize __color to store result
@@ -190,6 +246,18 @@ class sequenceSet(object):
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
+        all_resi = self.pymol.get_all_resi()
+        for resid in range(len(all_resi)):
+            if UR(all_resi[resid][1]) == '-':
+                pass
+            elif UR(all_resi[resid][1]) in ('A','N','C','Q','G','H','I','L','M','F','P','S','T','W','Y','V'):
+                self.pymol.setColor(all_resi[resid][0], "white")
+            elif UR(all_resi[resid][1]) in ('R','K'):
+                self.pymol.setColor(all_resi[resid][0], "red")
+            elif UR(all_resi[resid][1]) in ('D','E'):
+                self.pymol.setColor(all_resi[resid][0], "blue")
+            else:
+                self.pymol.setColor(all_resi[resid][0], "black")
         return
     def color_side_chain_solvent(self):
         # initialize __color to store result
@@ -213,6 +281,18 @@ class sequenceSet(object):
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
+        all_resi = self.pymol.get_all_resi()
+        for resid in range(len(all_resi)):
+            if UR(all_resi[resid][1]) == '-':
+                pass
+            elif UR(all_resi[resid][1]) in ('R','K','D','E'):
+                self.pymol.setColor(all_resi[resid][0], "red")
+            elif UR(all_resi[resid][1]) in ('Q','N','H','S','T','Y','C','M','W'):
+                self.pymol.setColor(all_resi[resid][0], "blue")
+            elif UR(all_resi[resid][1]) in ('A','I','L','F','V','P','G'):
+                self.pymol.setColor(all_resi[resid][0], "green")
+            else:
+                self.pymol.setColor(all_resi[resid][0], "black")
         return
     def color_selection(self, selections):
         """
@@ -234,6 +314,20 @@ class sequenceSet(object):
                     self.__color[seq_id].append(fcolor)
                 except IndexError:
                     pass
+        all_resi = self.pymol.get_all_resi()
+        for resid in range(len(all_resi)):
+            try:
+                if UR(all_resi[resid][1]) == '-':
+                    pass
+                elif UR(all_resi[resid][1]) in selections.keys():
+                    if UR(all_resi[resid][1]) == selections[frag_id]:
+                        self.pymol.setColor(all_resi[resid][0], "red")
+                    else:
+                        self.pymol.setColor(all_resi[resid][0], "white")
+                else:
+                    self.pymol.setColor(all_resi[resid][0], "white")
+            except IndexError:
+                pass
         return
     def color_common_with_scTim(self):
         frag_ids = range(1,300)
