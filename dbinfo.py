@@ -1,11 +1,18 @@
 # login to the specta table
 def getInfo():
 	
-	dbInfo = {
-		"host": "67.171.96.127", 
-		"username": "root",
-		"password": "root",
-		"dbName": "biovis"
-	}
-	
-	return dbInfo
+    dbInfo = {
+        "host": "timothy.forgot.his.name", 
+        "username": "root",
+        "password": "tbl2245!",
+        "dbName": "biovis"
+    }
+    
+    # dbInfo = {
+    #     "host": "ec2-54-203-206-121.us-west-2.compute.amazonaws.com", 
+    #     "username": "marai",
+    #     "password": "haidinamo",
+    #     "dbName": "biovis"
+    # }
+    # 
+    return dbInfo

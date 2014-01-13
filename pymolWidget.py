@@ -36,7 +36,6 @@ class PymolQtWidget(QGLWidget):
                   Qt.MidButton:1,
                   Qt.RightButton:2}
 
-
     def __init__(self, parent, enableUi,File=""):
         f = QGLFormat()
         f.setStencil(True)
@@ -113,7 +112,7 @@ class PymolQtWidget(QGLWidget):
         self.pymol.draw()
     def keyPressEvent(self, ev):
         print ev.key()
-        pymol2.PyMOL.parse(ev.key())
+        self.pymol.parse(ev.key())
         pass
     
     def mouseMoveEvent(self, ev):
@@ -125,7 +124,7 @@ class PymolQtWidget(QGLWidget):
             self.pymol.cmd.button("double_left","None","None")
             self.pymol.cmd.button("single_right","None","None")
         self.pymol.button(self._buttonMap[ev.button()], 0, ev.x(),
-self.height()-ev.y(),0)
+        self.height()-ev.y(),0)
         self._pymolProcess()
         #print self.pymol.cmd.get_names("all")
         #print self.pymol.cmd.get("scTIM", "active_selections")
@@ -136,7 +135,7 @@ self.height()-ev.y(),0)
         self._pymolProcess()
         self._timer.start(0)
         my_dict={"list":[]}
-        self.cmd.iterate("(sele)","list.append((resi,resn))",space=my_dict)
+        self.cmd.iterate("resi","list.append((resi,resn))",space=my_dict)
         #print my_dict["list"]
         l=[]
         for i in my_dict["list"]:
@@ -164,7 +163,7 @@ self.height()-ev.y(),0)
     def setStatus(self):
         pass
     def show_resi(self, resi_id):
-        self.cmd.show("sticks", "(resi %d)"%resi_id)
+        self.cmd.show("resi", "(resi %d)"%resi_id)
         self._pymolProcess()
         self.update()
     def get_all_resi(self):

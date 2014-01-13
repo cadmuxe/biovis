@@ -93,7 +93,7 @@ class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
         self.glv_render_one(self.opengl_driver)
         glFlush()
 
-    def glv_redraw(self):
+    def glv_redraw(self):   
         self.updateGL()
         #print "redraw"
         # why need to use updateGL, but glv_render() not works.
