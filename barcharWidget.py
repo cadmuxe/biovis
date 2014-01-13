@@ -16,13 +16,15 @@ class barcharWidget(QtGui.QWidget):
 
         self.cal_size()
 
-    def update_sequences(self, data):
+    def update_sequences(self, data, Alen, Blen):
         """
         """
         # (frag_id, frag, barchar_data)
         self.frags = data
+        self.Alen = Alen
+        self.Blen = Blen
         self.cal_size()
-        self.update()
+        self.repaint()
 
     def cal_size(self):
         try:
@@ -58,6 +60,19 @@ class barcharWidget(QtGui.QWidget):
             painter.setBrush(Qt.blue)
             painter.drawRect(x + 0.5*self.per_width - 0.5 *self.barchar_width, y + self.per_height *2.0,
                     self.barchar_width, -self.per_height*self.frags[i][2]*2.0)
+
+        
+        # draw visually cue for different
+        pen = QtGui.QPen()
+        pen.setWidth(3)
+        pen.setColor(Qt.green)
+        painter.setPen(pen)
+        painter.drawLine(0.5 * self.per_width, y + self.per_height *2.0 + 5, self.per_width * self.Alen, y + self.per_height *2.0 + 5)
+        
+        pen.setColor(Qt.blue)
+        painter.setPen(pen)
+        painter.drawLine(self.per_width * (self.Alen+0.5), y + self.per_height *2.0 + 5, 
+                self.per_width * (self.Alen + self.Blen), y + self.per_height *2.0 + 5) 
         painter.end()
 
     def resizeEvent(self, event):

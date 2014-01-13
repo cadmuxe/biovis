@@ -22,6 +22,16 @@ class color(object):
     c5 = QtGui.QColor(253, 219, 199)
     c6 = QtGui.QColor(209, 229, 240)
 
+    white = QtGui.QColor(251, 255, 244)
+    tetrad_red = QtGui.QColor(255, 49, 0)
+    tetrad_yellow = QtGui.QColor(255, 135, 0)
+    tetrad_blue = QtGui.QColor(7, 114, 161)
+    tetrad_green = QtGui.QColor(0, 183, 74)
+    pink = QtGui.QColor(253, 219, 199)
+
+
+
+
     @staticmethod
     def  random(not_color):
         """
@@ -142,6 +152,9 @@ class MyPaintWidget(QtGui.QWidget):
                 self.__scrollbar_width,self.__scroll_button_height)
 
         # draw outline of horizontal scroll button
+        # horA
+        pen.setColor(QtCore.Qt.green)
+        painter.setPen(pen)
         painter.drawRect((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horA, 0,
                 self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
         painter.drawPixmap((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horA, 0,
@@ -150,6 +163,9 @@ class MyPaintWidget(QtGui.QWidget):
                (self.__TIMs_cache_height-self.__widget_height)*self.__scroll_button_position,
                 self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
 
+        # horB
+        pen.setColor(QtCore.Qt.blue)
+        painter.setPen(pen)
         painter.drawRect((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horB, 0,
                 self.__scrollabr_button_width_hor*0.5,self.__TIMs_cache_height)
         painter.drawPixmap((self.__TIMs_cache_width-self.__scrollabr_button_width_hor*0.5)*self.__scroll_button_position_horB, 0,
@@ -236,7 +252,14 @@ class MyPaintWidget(QtGui.QWidget):
             self.__scroll_button_position_horB = 0.0
         elif self.__scroll_button_position_horB > 1.0:
             self.__scroll_button_position_horB = 1.0
-        self.update()
+        self.repaint()
+
+        rAf = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horA)
+        rAt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horA + int(self.__horizontal_selection_element_num*0.5)+1)
+        rBf = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB)
+        rBt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB + int(self.__horizontal_selection_element_num*0.5)+1)
+        for f in self.__callback["barchar"]:
+            f(rAf,rAt,rBf,rBt,self.on_sequences_id,self.on_frag_id)
 
     def mouseMoveEvent(self,event):
         x,y = event.x(),event.y()
@@ -264,7 +287,8 @@ class MyPaintWidget(QtGui.QWidget):
                 elif self.on_frag_id < 0:
                     self.on_frag_id = 0
                 if self.__callback.has_key("seq_name"):
-                    self.__callback["seq_name"](self.sequenceData[self.on_sequences_id].name)
+                    for f in self.__callback["seq_name"]:
+                        f(self.sequenceData[self.on_sequences_id].name)
             # sequence scrollbar
             elif self.hit =="scr":
                 d =  (y - self.cursor_pre_y) * 1.0 / self.__scrollbar_height
@@ -279,7 +303,8 @@ class MyPaintWidget(QtGui.QWidget):
         rAt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horA + int(self.__horizontal_selection_element_num*0.5)+1)
         rBf = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB)
         rBt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB + int(self.__horizontal_selection_element_num*0.5)+1)
-        self.__callback["barchar"](rAf,rAt,rBf,rBt,self.on_sequences_id,self.on_frag_id)
+        for f in self.__callback["barchar"]:
+            f(rAf,rAt,rBf,rBt,self.on_sequences_id,self.on_frag_id)
 
 
 
@@ -315,7 +340,23 @@ class MyPaintWidget(QtGui.QWidget):
 
 
     def registerClickCallBack(self, d):
-        self.__callback[d["name"]] = d["func"]
+        """
+            register callback
+            d: {"name":"name", "func":f}
+
+            seq_name: get current sequence name
+                     f(seq_name)
+            frag_name: get current frag_name and id
+                     f(frag_name, id)
+            for seq_name and frag_name you can register more than one
+            callback function
+
+            barchar: using for updating the barchar.
+        """
+        if d["name"] not in self.__callback:
+            self.__callback[d["name"]] = []
+        self.__callback[d["name"]].append(d["func"])
+
     def resizeEvent(self, *args, **kwargs):
         self.__TIMs_redraw = True
 
