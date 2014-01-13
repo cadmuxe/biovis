@@ -22,6 +22,7 @@ except mdb.Error, e:
 finally:
     count = 0
     with open("./pdb_uniprot_chain_map.lst.2") as lines:
+        
         for line in lines:
             att = line.split()
             
@@ -29,22 +30,32 @@ finally:
                 continue
             
             sql = """SELECT m.PDBCode From modbase m WHERE m.PDBCode = """
-            sql +=  """'""" + str(att[0]) + """'"""
+            sql +=  """'""" + str(att[0]) + """' AND m.PDBChain = """
+            sql +=  """'""" + str(att[1]) + """'"""
+            
+            #print sql
             
             cursor.execute(sql)
             result = cursor.fetchone()
             
+            #print result
+            
             if result is not None:
                 count += 1
                 sql = """UPDATE modbase SET FASTA="""
-                sql += """'""" + str(att[1]) + """'"""
+                sql += """'""" + str(att[2]) + """'"""
                 sql += """WHERE PDBCode="""
                 sql += """'""" + str(att[0]) + """'"""
-                    
+                sql += """AND PDBChain=""" 
+                sql += """'""" + str(att[1]) + """'"""
+                
                 cursor.execute(sql)
-            
+                            
                 print "result: " + str(result)
                 print "fasta: " + str(att[2])
+                
+            #else:
+               #print att 
     print count
     db.commit()
     db.close()

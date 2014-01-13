@@ -33,7 +33,10 @@ class MyEventFilter(QtCore.QObject):
 
         if event.type() == QtCore.QEvent.ContextMenu:
             self.context.emit(obj, QtGui.QCursor.pos())
-            
+        if event.type() == QtCore.QEvent.MouseButtonPress:
+            if event.button() == QtCore.Qt.RightButton:
+                print "right click"
+                
         return super(MyEventFilter,self).eventFilter(obj, event)
 
 class MainWindow(QtGui.QMainWindow):

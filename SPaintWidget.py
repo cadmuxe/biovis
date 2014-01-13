@@ -215,7 +215,13 @@ class MyPaintWidget(QtGui.QWidget):
                         < ((self.__scrollbar_height- self.__scroll_button_height)*self.__scroll_button_position + self.__scroll_button_height) and \
                 x > self.__scrollbar_postion_x:
                 self.hit ="scr"
-
+        
+        if self.cursor_button == QtCore.Qt.MouseButton.RightButton:
+            print "right button"
+            print self.sequenceData[self.on_sequences_id].name
+            # get sequence name here
+            
+            
     def mouseReleaseEvent(self,event):
         if self.cursor_button == event.button():
             self.cursor_button = QtCore.Qt.MouseButton.NoButton
@@ -256,12 +262,13 @@ class MyPaintWidget(QtGui.QWidget):
         rAt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horA + int(self.__horizontal_selection_element_num*0.5)+1)
         rBf = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB)
         rBt = int((self.sequences["max_len_frag"]-self.__horizontal_selection_element_num*0.5)* self.__scroll_button_position_horB + int(self.__horizontal_selection_element_num*0.5)+1)
+        
         for f in self.__callback["barchar"]:
             f(rAf,rAt,rBf,rBt,self.on_sequences_id,self.on_frag_id)
 
     def mouseMoveEvent(self,event):
         x,y = event.x(),event.y()
-
+            
         if self.cursor_button == QtCore.Qt.MouseButton.LeftButton:
             # fragment selection
             if self.hit == "horA":
