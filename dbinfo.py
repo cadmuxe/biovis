@@ -2,9 +2,9 @@
 def getInfo():
 	
     dbInfo = {
-        "host": "localhost", 
+        "host": "timothy.forgot.his.name", 
         "username": "root",
-        "password": "tbl2245!",
+        "password": "tbl2245",
         "dbName": "biovis"
     }
     

@@ -30,6 +30,16 @@ def define_color(set_color):
     set_color("c2",[0.129, 0.4, 0.674])
     set_color("c3", [0.93, 0.541, 0.384])
 
+    set_color("white", [0.9843, 1, 0.9569])
+    set_color("red", [1, 0.1922, 0])
+    set_color("yellow", [1, 0.5294, 0])
+    set_color("blue", [0.0275, 0.4471, 0.6314])
+    set_color("green", [0, 0.7176, 0.2902])
+    set_color("pink", [0.9922, 0.8588, 0.7804])
+
+    set_color("selected", [1,1,0])
+    set_color("balck", [0,0,0])
+
 
 class PymolQtWidget(QGLWidget):
     _buttonMap = {Qt.LeftButton:0,
@@ -75,6 +85,10 @@ class PymolQtWidget(QGLWidget):
         #globalSettings.settingsChanged.connect(self._updateGlobalSettings)
         self._updateGlobalSettings()
         define_color(self.cmd.set_color)
+
+        # used for save the color of residues
+        self._color_cache = {}
+        self._selected =[]
 
     def enableUI(self):
         self.pymol.cmd.set("internal_gui",1)
@@ -128,6 +142,30 @@ class PymolQtWidget(QGLWidget):
         self._pymolProcess()
         #print self.pymol.cmd.get_names("all")
         #print self.pymol.cmd.get("scTIM", "active_selections")
+
+    def setColor(self, residueid, color):
+        """
+            residueid: from 1 to n
+            color: string, define color in define_color 
+                   white, red, yellow, blue, green, pink
+        """
+        self.cmd.color(color, "resi %s" % str(residueid))
+        # the cache is used for selection. the selection need to save the
+        # color of selected residue for restore
+        self._color_cache[int(residueid)] = color
+        self.repaint()
+
+    def selectResidue(self, resis):
+        """
+        """
+        for resi in self._selected:
+            self.setColor(resi, self._color_cache[resi])
+        self._selected = resis
+        for resi in self._selected:
+            self.cmd.color("selected", "resi %s" % str(resi))
+
+        self.repaint()
+        
 
     def mouseReleaseEvent(self, ev):
         self.pymol.button(self._buttonMap[ev.button()], 1, ev.x(),
