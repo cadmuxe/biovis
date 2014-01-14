@@ -303,13 +303,15 @@ class MainWindow(QtGui.QMainWindow):
         self.glWidgetD.selectResidue(id_list)
 
     def update_dTIM_select_pymol(self,l):
+        print l
         for item in l:
             self.dTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
             self.scTIMList.setCurrentRow(int(item[0])-1,QtGui.QItemSelectionModel.Select)
-            self.glWidgetSC.show_resi(int(item[0]))
-            self.glWidgetD.show_resi(int(item[0]))
+            #self.glWidgetSC.show_resi(int(item[0]))
+            #self.glWidgetD.show_resi(int(item[0]))
 
-        self.TIMs.move_scroll_to_resi(int(l[-1][0]))
+        if len(l) > 0:
+            self.TIMs.move_scroll_to_resi(int(l[-1][0]))
 
     def initMenus(self):
         menuBar = self.menuBar()

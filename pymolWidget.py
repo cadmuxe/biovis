@@ -125,8 +125,8 @@ class PymolQtWidget(QGLWidget):
         self._doIdle()
         self.pymol.draw()
     def keyPressEvent(self, ev):
-        print ev.key()
-        self.pymol.parse(ev.key())
+        #print ev.key()
+        # self.pymol.parse(ev.key())
         pass
     
     def mouseMoveEvent(self, ev):
@@ -173,7 +173,7 @@ self.height()-ev.y(),0)
         self._pymolProcess()
         self._timer.start(0)
         my_dict={"list":[]}
-        self.cmd.iterate("resi","list.append((resi,resn))",space=my_dict)
+        self.cmd.iterate("(sele)","list.append((resi,resn))",space=my_dict)
         #print my_dict["list"]
         l=[]
         for i in my_dict["list"]:
