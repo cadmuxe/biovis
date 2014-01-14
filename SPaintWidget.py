@@ -216,9 +216,9 @@ class MyPaintWidget(QtGui.QWidget):
                 x > self.__scrollbar_postion_x:
                 self.hit ="scr"
         
-        if self.cursor_button == QtCore.Qt.MouseButton.RightButton:
-            print "right button"
-            print self.sequenceData[self.on_sequences_id].name
+        # if self.cursor_button == QtCore.Qt.MouseButton.RightButton:
+        #     lookup = self.sequenceData[self.on_sequences_id].name[:6]
+        #     print lookup
             # get sequence name here
             
             

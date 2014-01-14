@@ -1,6 +1,6 @@
 #!/usr/bin/env python -W ignore::DeprecationWarning
 import sys
-
+import urllib, re
 from web import Browser
 from vis import * # includes QT and openGL imports
 from sequenceSet import sequenceSet
@@ -172,16 +172,30 @@ class MainWindow(QtGui.QMainWindow):
         self.glWidgetD.setStatus()
     
     def on_TIM_menu(self, point):
+                
+        uniprot =  self.selected_sequence_name
+        mID = uniprot.split('/')[0]
         
-        fasta =  self.selected_sequence_name[:6]
+        pattern = re.compile('<p id="status"><strong>(.+?)</strong>')
+        url = "http://www.uniprot.org/uniprot/" + str(mID)
+        sock = urllib.urlopen(url)
+        flist = pattern.findall(sock.read())
+        sock.close()
+        
+        fasta = flist[0].split()
+        fasta = str(fasta[0])
+        
         model = 0
         
-        sql = "SELECT l.PDBCode, l.ModelID FROM modbase l WHERE l.FASTA = "
-        sql += """'""" + fasta + """'"""
+        sql = "SELECT l.PDBCode FROM modbase l WHERE l.FASTA = "
+        sql += """'""" + fasta[0] + """'"""
         
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
-                
+        
+        sortRes = sorted(set(result))
+        print sortRes
+        
         # create context menu content
         timMenu = QtGui.QMenu(self)
         
