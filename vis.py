@@ -10,117 +10,117 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import new
 
-from mmLib import FileIO, Structure, Viewer, OpenGLDriver
+#from mmLib import FileIO, Structure, Viewer, OpenGLDriver
 from SPaintWidget import *
-from GLPropertyBrowser import *
+#from GLPropertyBrowser import *
 
-class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
-    def __init__(self, path, parent=None):
-        
-        self.parent = parent
-        self.glstruct = None
-        self.ready = False
-                
-        QtOpenGL.QGLWidget.__init__(self, self.parent)
-        
-        self.opengl_driver = OpenGLDriver.OpenGLDriver()
-                
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        
-        Viewer.GLViewer.__init__(self)
-        
-        gluPerspective(45.0, self.width()/self.height(), 0.0001, 1000)
-        
-        self.load_struct(path)
-
-        ## install new draw method
-        #self.install_draw_method({ "name":"lines",
-        #      "func":                glal_draw_lines,
-        #      "transparent":         False,
-        #      "visible_property":    "lines",
-        #      "recompile_action":    "recompile_lines" })
-                    
-    def load_struct(self, path = None):
-                
-        try:
-            struct = FileIO.LoadStructure(
-                fil              = path,
-                library_bonds    = True,
-                distance_bonds   = True )
-        
-        except IOError:
-            error( "file not found: %s" % (path) )
-            return None
-
-        struct_desc = {}
-        struct_desc["struct"] = struct
-        struct_desc["path"] = path
-                
-        self.glstruct = self.glv_add_struct(struct)
-        
-        self.prop_editor = GLPropertyBrowserDialog(
-            glo_root      = self.glstruct )
-                    
-        return struct
-    
-    def setStatus(self):
-        self.ready = True
-    
-    def getStruct(self):
-        return self.glstruct
-    
-    # show property 
-    def showEditor(self):
-        self.prop_editor.show()
-        
-    def initializeGL(self):
-        #glutInit(sys.argv)
-        
-        self.glv_init()
-
-    def resizeGL(self, width, height):
-        self.glv_resize(width, height)
-
-    def paintGL(self):
-        
-        if not self.ready:
-            return 1
-        
-        self.glv_render()
-
-    def glv_render(self):
-                    
-        self.glv_render_one(self.opengl_driver)
-        glFlush()
-
-    def glv_redraw(self):   
-        self.updateGL()
-        #print "redraw"
-        # why need to use updateGL, but glv_render() not works.
-        # Answer: update Tells QT to refresh the widget
-    
-    def update_select(self, fragment_id_list=[]):
-        
-        #print "update_select"
-        #self.update_fragment_id_list(fragment_id_list)
-        #self.glv_redraw()
-        # for frag in self.glstruct.iter_fragments():
-        #     print frag  
-        #print fragment_id_list
-        for child in self.glstruct.glo_iter_children():
-            if isinstance(child, Viewer.GLChain):    
-                for frag in child.glal_iter_atoms():
-                    print type(frag.get_fragment())
-    
-    def install_draw_method(self,method):
-        for glstructure in self.glo_iter_children():
-            for glchain in glstructure.glo_iter_children():
-                if isinstance(glchain, Viewer.GLChain):
-                    instancemethod = new.instancemethod(method["func"], glchain, Viewer.GLChain)
-                    for i in glchain.gldl_draw_method_list:
-                        # this method looks bad, but i have not other choice
-                        if i["name"] == method["name"]:
-                            i["func"] = instancemethod
+# class GLWidget(QtOpenGL.QGLWidget, Viewer.GLViewer):
+#     def __init__(self, path, parent=None):
+#         
+#         self.parent = parent
+#         self.glstruct = None
+#         self.ready = False
+#                 
+#         QtOpenGL.QGLWidget.__init__(self, self.parent)
+#         
+#         self.opengl_driver = OpenGLDriver.OpenGLDriver()
+#                 
+#         self.setFocusPolicy(QtCore.Qt.StrongFocus)
+#         
+#         Viewer.GLViewer.__init__(self)
+#         
+#         gluPerspective(45.0, self.width()/self.height(), 0.0001, 1000)
+#         
+#         self.load_struct(path)
+# 
+#         ## install new draw method
+#         #self.install_draw_method({ "name":"lines",
+#         #      "func":                glal_draw_lines,
+#         #      "transparent":         False,
+#         #      "visible_property":    "lines",
+#         #      "recompile_action":    "recompile_lines" })
+#                     
+#     def load_struct(self, path = None):
+#                 
+#         try:
+#             struct = FileIO.LoadStructure(
+#                 fil              = path,
+#                 library_bonds    = True,
+#                 distance_bonds   = True )
+#         
+#         except IOError:
+#             error( "file not found: %s" % (path) )
+#             return None
+# 
+#         struct_desc = {}
+#         struct_desc["struct"] = struct
+#         struct_desc["path"] = path
+#                 
+#         self.glstruct = self.glv_add_struct(struct)
+#         
+#         self.prop_editor = GLPropertyBrowserDialog(
+#             glo_root      = self.glstruct )
+#                     
+#         return struct
+#     
+#     def setStatus(self):
+#         self.ready = True
+#     
+#     def getStruct(self):
+#         return self.glstruct
+#     
+#     # show property 
+#     def showEditor(self):
+#         self.prop_editor.show()
+#         
+#     def initializeGL(self):
+#         #glutInit(sys.argv)
+#         
+#         self.glv_init()
+# 
+#     def resizeGL(self, width, height):
+#         self.glv_resize(width, height)
+# 
+#     def paintGL(self):
+#         
+#         if not self.ready:
+#             return 1
+#         
+#         self.glv_render()
+# 
+#     def glv_render(self):
+#                     
+#         self.glv_render_one(self.opengl_driver)
+#         glFlush()
+# 
+#     def glv_redraw(self):   
+#         self.updateGL()
+#         #print "redraw"
+#         # why need to use updateGL, but glv_render() not works.
+#         # Answer: update Tells QT to refresh the widget
+#     
+#     def update_select(self, fragment_id_list=[]):
+#         
+#         #print "update_select"
+#         #self.update_fragment_id_list(fragment_id_list)
+#         #self.glv_redraw()
+#         # for frag in self.glstruct.iter_fragments():
+#         #     print frag  
+#         #print fragment_id_list
+#         for child in self.glstruct.glo_iter_children():
+#             if isinstance(child, Viewer.GLChain):    
+#                 for frag in child.glal_iter_atoms():
+#                     print type(frag.get_fragment())
+#     
+#     def install_draw_method(self,method):
+#         for glstructure in self.glo_iter_children():
+#             for glchain in glstructure.glo_iter_children():
+#                 if isinstance(glchain, Viewer.GLChain):
+#                     instancemethod = new.instancemethod(method["func"], glchain, Viewer.GLChain)
+#                     for i in glchain.gldl_draw_method_list:
+#                         # this method looks bad, but i have not other choice
+#                         if i["name"] == method["name"]:
+#                             i["func"] = instancemethod
 
 class ListWidget(QtGui.QListWidget):
     def __init__(self,text, parent = None):

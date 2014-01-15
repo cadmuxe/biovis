@@ -20,7 +20,7 @@ class MyEventFilter(QtCore.QObject):
     # mouse wheel event
     wheeled  = QtCore.Signal(QtCore.QEvent)
     # context menu event for Viewer
-    context = QtCore.Signal(Viewer.GLViewer, QtCore.QPoint)
+    #context = QtCore.Signal(Viewer.GLViewer, QtCore.QPoint)
     
     def __init__(self):
         super(MyEventFilter, self).__init__()
