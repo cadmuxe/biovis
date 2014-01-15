@@ -503,6 +503,7 @@ class MainWindow(QtGui.QMainWindow):
         QtGui.qApp.quit()
 
     def barchar_update(self, selection_f, selection_t,fB,tB, seqid, fragid):
+        
         seq = self.__sequenceSet[seqid].seq
         #frag_from, frag_to = selection_f, selection_t
         def helper(x):

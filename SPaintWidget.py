@@ -179,6 +179,7 @@ class MyPaintWidget(QtGui.QWidget):
             selection = QtGui.QPixmap(self.paint_frag_width * self.sequences["max_len_frag"], 10)
             selection.fill(QtCore.Qt.white)
             painter_s = QtGui.QPainter(selection)
+            #print selection
             painter_s.setPen(QtCore.Qt.NoPen)
             for y in range(0, len(self.sequences[self.on_sequences_id])):
                 painter_s.setBrush(self.sequences[self.on_sequences_id][y])
@@ -239,14 +240,14 @@ class MyPaintWidget(QtGui.QWidget):
             self.__scroll_button_position_horA = 0.0
         elif self.__scroll_button_position_horA > 1.0:
             self.__scroll_button_position_horA = 1.0
-        print self.__scroll_button_position_horA,self.sequences["max_len_frag"]
+        #print self.__scroll_button_position_horA,self.sequences["max_len_frag"]
     def update_scroll_horB(self,dx):
         self.__scroll_button_position_horB +=dx
         if self.__scroll_button_position_horB<0:
             self.__scroll_button_position_horB = 0.0
         elif self.__scroll_button_position_horB > 1.0:
             self.__scroll_button_position_horB = 1.0
-        print self.__scroll_button_position_horB,self.sequences["max_len_frag"]
+        #print self.__scroll_button_position_horB,self.sequences["max_len_frag"]
 
     def move_scroll_to_resi(self, resi_id):
         print (resi_id, self.sequences["max_len_frag"])

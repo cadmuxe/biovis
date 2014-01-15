@@ -419,6 +419,7 @@ class sequenceSet(object):
         for seq in self.__sequence:
             seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+        
     def sort_by_weighted_edit_dist(self):
         """
         Sort by weighted edit distance from scTIM
@@ -431,7 +432,10 @@ class sequenceSet(object):
         # set the dTIM_core's weight  to a large number, so that it will alway the top one
         self.__sequence[-1].weight += 999999999
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
-
+        
+        print self.__scTIM.seq
+        print len(self.__scTIM.seq)
+        
     def sort_by_num_of_common_residues_with_scTIM(self):
         """
         sort by number of residues in common with scTIM
@@ -439,6 +443,7 @@ class sequenceSet(object):
         From John
         """
         self.clear_weight()
+        
         for seq in self.__sequence:
             similarityCounter = 0
             for i in range(min(len(seq.seq), len(self.__scTIM.seq))):

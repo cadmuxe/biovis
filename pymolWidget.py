@@ -72,7 +72,7 @@ class PymolQtWidget(QGLWidget):
         self.pymol.cmd.load(File)
         
         if(File == "./data/scTIM.pdb"):
-            self.cmd.show("spheres", "chain B")
+            self.cmd.show("cartoon", "chain B")
             self.cmd.hide("lines", "chain B")
         else:
             self.cmd.hide("all")

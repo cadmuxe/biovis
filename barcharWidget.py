@@ -37,12 +37,14 @@ class barcharWidget(QtGui.QWidget):
         painter = QtGui.QPainter(self)
 
         for i in range(len(self.frags)):
+            
             x = i * self.per_width + 0.25 * self.per_width
             y = self.per_height * 0.5
+            
             # draw frag_id
             painter.setPen(Qt.black)
             painter.drawText(x, y, self.per_width, self.per_height,
-                    Qt.AlignCenter, str(self.frags[i][0]))
+                    Qt.AlignCenter, str(int(self.frags[i][0])+1))
 
             # draw frag
             y+= self.per_height
