@@ -76,9 +76,9 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
         #self.glWidgetSC = GLWidget("./data/C7JHB8_ACEP3.B99990002.pdb", self.centralWidget)
-        self.glWidgetSC = PymolQtWidget(self.centralWidget, False, File="./data/C7JHB8_ACEP3.B99990002.pdb")
+        self.glWidgetSC = PymolQtWidget(self.centralWidget, False, File="./data/TPIS_HAEDU.pdb")
         #self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
-        self.glWidgetD = PymolQtWidget(self.centralWidget, False,File="./data/scTIM.pdb")
+        self.glWidgetD = PymolQtWidget(self.centralWidget, False, File="./data/scTIM.pdb")
 
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
@@ -100,11 +100,11 @@ class MainWindow(QtGui.QMainWindow):
         #settings.setFontFamily(QtWebKit.QWebSettings.StandardFont, 'Times New Roman')
         #self.browser.settings().setFontSize(QtWebKit.QWebSettings.DefaultFontSize, 8)
         
-        self.view1.addTab(self.glWidgetSC,"scTIM")
-        self.view1.addTab( self.browser1,"dTIM Ref.")
+        self.view1.addTab(self.glWidgetSC,"dTIM")
+        self.view1.addTab( self.browser1,"scTIM Ref.")
         
-        self.view2.addTab(self.glWidgetD,"dTIM")
-        self.view2.addTab( self.browser2,"scTIM Ref.")
+        self.view2.addTab(self.glWidgetD,"scTIM")
+        self.view2.addTab( self.browser2,"dTIM Ref.")
         
         self.gridlayout.addWidget(self.view1, 0, 1, 2, 1)
         self.gridlayout.addWidget(self.view2, 0, 0, 2, 1)
@@ -187,14 +187,14 @@ class MainWindow(QtGui.QMainWindow):
         
         model = 0
         
-        sql = "SELECT l.PDBCode FROM modbase l WHERE l.FASTA = "
+        sql = "SELECT l.PDBCode, l.FASTA, l.UNIPROT FROM lookup l WHERE l.FASTA = "
         sql += """'""" + fasta[0] + """'"""
         
         self.cursor.execute(sql)
         result = self.cursor.fetchall()
         
-        sortRes = sorted(set(result))
-        print sortRes
+        #sortRes = sorted(set(result))
+        print result    
         
         # create context menu content
         timMenu = QtGui.QMenu(self)

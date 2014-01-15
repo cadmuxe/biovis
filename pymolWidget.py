@@ -70,10 +70,20 @@ class PymolQtWidget(QGLWidget):
             self.pymol.cmd.button("single_right","None","None")
 
         self.pymol.cmd.load(File)
-        self.cmd.show("cartoon")
+        
+        if(File == "./data/scTIM.pdb"):
+            self.cmd.show("spheres", "chain B")
+            self.cmd.hide("lines", "chain B")
+        else:
+            self.cmd.hide("all")
+            self.cmd.cartoon("tube")
+            self.cmd.show("cartoon")
+            
+        
+        #self.cmd.show("cartoon")
         #self.cmd.cartoon("putty")
         self.cmd.set("cartoon_highlight_color", 1)
-        self.cmd.hide("lines")
+        #self.cmd.hide("lines")
         #self.cmd.hide("chain ")
         self.color_obj(0)
         #self.cmd.color("marine")
