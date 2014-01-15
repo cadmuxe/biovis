@@ -398,6 +398,8 @@ class sequenceSet(object):
             for frag_id in range(len(seq)):
                 if seq[frag_id] == self.max_frag_frequency[frag_id][1]:
                     seq.weight +=(self.max_frag_frequency[frag_id][2]/largest)
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 9999999999
         # sort the sequence
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
 
@@ -420,6 +422,8 @@ class sequenceSet(object):
         leve = LeveDist(5, 5, 3)
         for seq in self.__sequence:
             seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 999999999
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
 
     def sort_by_num_of_common_residues_with_scTIM(self):
@@ -435,6 +439,8 @@ class sequenceSet(object):
                 if seq.seq[i] == self.__scTIM.seq[i]:
                     similarityCounter += 1
             seq.weight = similarityCounter
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 999999999
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
     
     def sort_by_num_of_common_residues_with_scTIM_norm(self):
@@ -450,6 +456,8 @@ class sequenceSet(object):
                 if seq.seq[i] == self.__scTIM.seq[i]:
                     similarityPercentageCounter += 1
             seq.weight = similarityPercentageCounter / len(seq.seq)
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 999999999
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
    
     def sort_by_number_of_common_residues_with_scTIM_without_position(self):
@@ -476,6 +484,9 @@ class sequenceSet(object):
                 else:
                     overallCount += loopResidues[k]
             seq.weight = overallCount
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 999999999
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
     
     def sort_by_percent_of_common_residues_with_scTIM_without_position(self):
         """
@@ -504,6 +515,9 @@ class sequenceSet(object):
                 else:
                     overallCount += loopResidues[k]
             seq.weight = overallCount/scTIMPercentCount
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 999999999
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
 
     def sort_by_number_of_residue_seq_of_len_n(self, n):
         """
@@ -517,6 +531,9 @@ class sequenceSet(object):
                 if seq.seq[i:i+n] == self.__scTIM.seq[i:i+n]:
                     similarityLengthCounter += 1
             seq.weight = similarityLengthCounter
+        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+        # set the dTIM_core's weight  to a large number, so that it will alway the top one
+        self.__sequence[-1].weight += 999999999
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
         
 
