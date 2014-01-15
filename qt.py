@@ -490,7 +490,7 @@ class MainWindow(QtGui.QMainWindow):
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
 
         # load TIMs, and coloring them and update for darwing
-        self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa" , pymol = self.glWidgetD)
+        self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa" , pymols = [self.glWidgetD, self.glWidgetSC])
         self.__sequenceSet.loadscTIMFromFile("data/scTIM.fa")
         self.current_sortting={"func":"", "name":"Haven't been sorted"}
         self.current_coloring ={"func":self.__sequenceSet.frequencyColor, "name":"Frequency coloring"}
