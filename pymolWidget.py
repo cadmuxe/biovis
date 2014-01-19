@@ -52,7 +52,7 @@ class PymolQtWidget(QGLWidget):
         f.setRgba(True)
         f.setDepth(True)
         f.setDoubleBuffer(True)
-        QGLWidget.__init__(self, f, parent=parent)
+        QGLWidget.__init__(self, f, parent=parent)        
         self.setMinimumSize(500, 500)
         self._enableUi=enableUi
         self.pymol = pymol2.PyMOL()# _pymolPool.getInstance()
@@ -99,7 +99,10 @@ class PymolQtWidget(QGLWidget):
         # used for save the color of residues
         self._color_cache = {}
         self._selected =[]
-
+    
+    def setSibling(self,sib):
+        self.sibling = sib
+        
     def enableUI(self):
         self.pymol.cmd.set("internal_gui",1)
         self.pymol.cmd.set("internal_feedback",1)
@@ -142,14 +145,23 @@ class PymolQtWidget(QGLWidget):
     def mouseMoveEvent(self, ev):
         self.pymol.drag(ev.x(), self.height()-ev.y(),0)
         self._pymolProcess()
-
+        
+        self.sibling.pymol.drag(ev.x(), self.height()-ev.y(),0)
+        self.sibling._pymolProcess()
+        
     def mousePressEvent(self, ev):
         if not self._enableUi:
             self.pymol.cmd.button("double_left","None","None")
             self.pymol.cmd.button("single_right","None","None")
+            
         self.pymol.button(self._buttonMap[ev.button()], 0, ev.x(),
         self.height()-ev.y(),0)
         self._pymolProcess()
+        
+        self.sibling.pymol.button(self._buttonMap[ev.button()], 0, ev.x(),
+        self.height()-ev.y(),0)
+        self.sibling._pymolProcess()
+        
         #print self.pymol.cmd.get_names("all")
         #print self.pymol.cmd.get("scTIM", "active_selections")
 

@@ -79,7 +79,10 @@ class MainWindow(QtGui.QMainWindow):
         self.glWidgetSC = PymolQtWidget(self.centralWidget, False, File="./data/TPIS_HAEDU.pdb")
         #self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
         self.glWidgetD = PymolQtWidget(self.centralWidget, False, File="./data/scTIM.pdb")
-
+        
+        self.glWidgetSC.setSibling(self.glWidgetD)
+        self.glWidgetD.setSibling(self.glWidgetSC)
+        
         self.dTIMList = ListWidget(self.centralWidget)
         self.scTIMList = ListWidget(self.centralWidget)
         self.TIMs = MyPaintWidget(self.centralWidget)
