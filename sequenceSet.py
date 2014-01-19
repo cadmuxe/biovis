@@ -418,6 +418,7 @@ class sequenceSet(object):
         leve  = LeveDist(1, 1, 1)
         for seq in self.__sequence:
             seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
+        
         self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
         
     def sort_by_weighted_edit_dist(self):
@@ -429,13 +430,23 @@ class sequenceSet(object):
         leve = LeveDist(5, 5, 3)
         for seq in self.__sequence:
             seq.weight = leve.computeDistance(seq.seq, self.__scTIM.seq)
+            
         # set the dTIM_core's weight  to a large number, so that it will alway the top one
-        self.__sequence[-1].weight += 999999999
-        self.__sequence.sort(key=lambda seq:seq.weight, reverse = True)
+        self.__sequence[0].weight += 9999999999
+        self.__sequence[-1].weight = self.__sequence[0].weight - 1
+                
+        # myp = ""        
+        # for seq in self.__sequence:
+        #     myp += str(seq._sequence__name) + " "
+        # print myp
         
-        print self.__scTIM.seq
-        print len(self.__scTIM.seq)
+        self.__sequence.sort(key=lambda seq: seq.weight, reverse = True)
         
+        # myp = ""        
+        # for seq in self.__sequence:
+        #     myp += str(seq._sequence__name) + " "
+        # print myp
+    
     def sort_by_num_of_common_residues_with_scTIM(self):
         """
         sort by number of residues in common with scTIM
