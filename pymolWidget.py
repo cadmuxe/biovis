@@ -7,8 +7,6 @@ from PySide import QtCore
 
 import pymol2
 
-
-
 residues_class = [('RRG','LYS','ASP','GLU'),
                   ('GLN','ASN','HIS','SER','THR','TYR','CYS','MET','TRP'),
                   ('ALA','ILE','LEU','PHE','VAL','PRO','GLY')]
@@ -65,7 +63,7 @@ class PymolQtWidget(QGLWidget):
 
         if not self._enableUi:
             self.pymol.cmd.set("internal_gui",0)
-            self.pymol.cmd.set("internal_feedback",1)
+            self.pymol.cmd.set("internal_feedback",0)
             self.pymol.cmd.button("double_left","None","None")
             self.pymol.cmd.button("single_right","None","None")
 

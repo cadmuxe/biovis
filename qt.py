@@ -48,18 +48,18 @@ class MainWindow(QtGui.QMainWindow):
             
         self.setWindowTitle("2013 BioVis Contest")
         #self.resize(1280, 1024)
-        self.resize(640, 512)
+        self.resize(1024, 1024)
         
         info = DB.getInfo()
         self.db = None
         
         try:
             # Open database connection
-            self.db = mdb.connect( info["host"], info["username"],
-                info["password"], info["dbName"])
+            #self.db = mdb.connect( info["host"], info["username"],
+            #    info["password"], info["dbName"])
             # 
             # prepare a cursor object using cursor() method
-            self.cursor = self.db.cursor()
+            #self.cursor = self.db.cursor()
             # 
             # sql = """SELECT l.FASTA FROM lookup l WHERE l.PDB ='2YPI' """
             # self.cursor.execute(sql)
