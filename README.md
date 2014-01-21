@@ -30,7 +30,10 @@ Installation
 	* Downloading the zip: https://github.com/cadmuxe/biovis/archive/master.zip
 
 * From Ubuntu, launch a terminal window
-* Execute the following commands:
+* Execute the following commands in the terminal window (copy and paste):
 	* sudo apt-get update 
-	* sudo apt-get install build-essentials python2.7 freeglut3 libgl1-mesa-glx libglu1-mesa python-tk python-pmw python2.7-dev python-pyside mysql-client
+	* sudo apt-get install build-essential python2.7 freeglut3 libgl1-mesa-glx libglu1-mesa python-tk python-pmw python-pip python2.7-dev python-pyside mysql-client python-mysqldb pymol cmake python-qt4*
+	* sudo pip install --upgrade pip
+	* sudo pip install --upgrade virtualenv
+	* sudo pip install pyopengl 
 
