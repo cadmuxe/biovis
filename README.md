@@ -13,9 +13,14 @@ Dependence
 * MySQLdb
 
 
-Usage
+System Requirements
 -----
-Ubuntu 12.04+
+Ubuntu 12.04 and up
+
+If using either Macintosh or Windows:
+* Download Virtual Box (https://www.virtualbox.org/), or any equivalent piece of software (Parallels Desktop, VMWare, etc.)
+* Download Ubuntu Desktop (http://www.ubuntu.com/download), making sure it is version 12.04 or newer
+* Follow the instructions (https://www.virtualbox.org/manual/ch02.html) to setup the virtual machine
 
 Installation
 ------------
