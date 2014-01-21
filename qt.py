@@ -9,6 +9,16 @@ import MySQLdb as mdb
 import dbinfo as DB
 from pymolWidget import PymolQtWidget
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath("./data")
+
+    return os.path.join(base_path, relative_path)
+
 # Class that handles the mouse event filters 
 # to link the views
 class MyEventFilter(QtCore.QObject):
@@ -76,9 +86,13 @@ class MainWindow(QtGui.QMainWindow):
         self.gridlayout = QtGui.QGridLayout(self.centralWidget)
         
         #self.glWidgetSC = GLWidget("./data/C7JHB8_ACEP3.B99990002.pdb", self.centralWidget)
-        self.glWidgetSC = PymolQtWidget(self.centralWidget, False, File="./data/TPIS_HAEDU.pdb")
+  
+        scPDB = resource_path("scTIM.pdb")
+        dPDB = resource_path("TPIS_HAEDU.pdb")
+            
+        self.glWidgetSC = PymolQtWidget(self.centralWidget, False, File=dPDB)
         #self.glWidgetD = GLWidget("./data/scTIM.pdb", self.centralWidget)
-        self.glWidgetD = PymolQtWidget(self.centralWidget, False, File="./data/scTIM.pdb")
+        self.glWidgetD = PymolQtWidget(self.centralWidget, False, File=scPDB)
         
         self.glWidgetSC.setSibling(self.glWidgetD)
         self.glWidgetD.setSibling(self.glWidgetSC)
@@ -246,7 +260,7 @@ class MainWindow(QtGui.QMainWindow):
     
     def on_tim_clicked(self):
        
-        name = "./data/PDB/P56076_2JGQ.pdb"#str(self.selected_sequence_name[:6]) + "_" + str(self.selected_PDB) + ".pdb"
+        name = resource_path(".PDB/P56076_2JGQ.pdb")#str(self.selected_sequence_name[:6]) + "_" + str(self.selected_PDB) + ".pdb"
         self.PDB = "2JGQ"
         self.FASTA = "P56076"
         
@@ -464,15 +478,21 @@ class MainWindow(QtGui.QMainWindow):
     # Create the lists in the right panel
     def initTIMs(self):
          
-        # read dTIM
-        f = open("data/dTIM.fa")
+
+        dtimFA = resource_path("dTIM.fa")
+        sctimFA = resource_path("scTIM.fa")
+        coreAlign = resource_path("cTIM_core_align.fa")
+        
+        
+        f = open(dtimFA)
         line = f.readline()
         f.close()
+        
         # add each element to a list
         dTIM = [frag for frag in line]
 
         # read scTIM
-        f = open("data/scTIM.fa")
+        f = open(sctimFA)
         line = f.readline()
         f.close()
         # add each element to a list
@@ -493,8 +513,8 @@ class MainWindow(QtGui.QMainWindow):
                 item_sc.setBackground(QtGui.QBrush(QtGui.QColor(204,204,255)))
 
         # load TIMs, and coloring them and update for darwing
-        self.__sequenceSet = sequenceSet("data/cTIM_core_align.fa" , pymols = [self.glWidgetD, self.glWidgetSC])
-        self.__sequenceSet.loadscTIMFromFile("data/scTIM.fa")
+        self.__sequenceSet = sequenceSet(coreAlign , pymols = [self.glWidgetD, self.glWidgetSC])
+        self.__sequenceSet.loadscTIMFromFile(sctimFA)
         self.current_sortting={"func":"", "name":"Haven't been sorted"}
         self.current_coloring ={"func":self.__sequenceSet.frequencyColor, "name":"Frequency coloring"}
         self.__sequenceSet.frequencyColor()                 # could use other coloring method

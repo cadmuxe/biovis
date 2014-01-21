@@ -1,9 +1,19 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from PySide import QtGui
-from PySide.QtOpenGL import *
-from PySide.QtCore import Qt
+import sys
+
+# Save sys.path
+sys_path_saved = sys.path
+
+sys.path = ['/usr/local/lib/python2.7/site-packages']
+
+#from PySide import QtGui
 from PySide import QtCore
+from PySide.QtOpenGL import QGLWidget, QGLFormat
+from PySide.QtCore import Qt
+
+# Reset sys.path to original
+sys.path = sys_path_saved
 
 import pymol2
 
@@ -69,7 +79,9 @@ class PymolQtWidget(QGLWidget):
 
         self.pymol.cmd.load(File)
         
-        if(File == "./data/scTIM.pdb"):
+        # inFile = "./data/scTIM.pdb"
+        
+        if(File[-9:-1] == "scTIM.pdb"):
             self.cmd.show("cartoon", "chain B")
             self.cmd.hide("lines", "chain B")
         else:
@@ -297,51 +309,51 @@ SEE ALSO
 
 
 # You don't need anything below this
-class PyMolWidgetDemo(QtGui.QMainWindow):
-     def __init__(self):
-         QtGui.QMainWindow.__init__(self)
-         widget = PymolQtWidget(self,True,"../data/scTIM.pdb")
-         self.setCentralWidget(widget)
-
-if __name__ == '__main__':
-     app = QtGui.QApplication(['PyMol Widget Demo'])
-     window = PyMolWidgetDemo()
-     window.show()
-     app.exec_()
-
-def hsv_to_rgb(hsv):
-        h = float(hsv[0])
-        s = float(hsv[1])
-        v = float(hsv[2])
-
-        if( s == 0 ) :
-                #achromatic (grey)
-                r = g = b = v
-
-        else:
-                # sector 0 to 5
-                h = h/60.
-                i = int(h)
-                f = h - i                       # factorial part of h
-                #print h,i,f
-                p = v * ( 1 - s )
-                q = v * ( 1 - s * f )
-                t = v * ( 1 - s * ( 1 - f ) )
-
-                if i == 0:
-                        (r,g,b) = (v,t,p)
-                elif i == 1:
-                        (r,g,b) = (q,v,p)
-                elif i == 2:
-                        (r,g,b) = (p,v,t)
-                elif i == 3:
-                        (r,g,b) = (p,q,v)
-                elif i == 4:
-                        (r,g,b) = (t,p,v)
-                elif i == 5:
-                        (r,g,b) = (v,p,q)
-                else:
-                        (r,g,b) = (v,v,v)
-                        print "error, i not equal 1-5"
-
-        return [r,g,b]
+# class PyMolWidgetDemo(QtGui.QMainWindow):
+#      def __init__(self):
+#          QtGui.QMainWindow.__init__(self)
+#          widget = PymolQtWidget(self,True, "../data/scTIM.pdb")
+#          self.setCentralWidget(widget)
+# 
+# if __name__ == '__main__':
+#      app = QtGui.QApplication(['PyMol Widget Demo'])
+#      window = PyMolWidgetDemo()
+#      window.show()
+#      app.exec_()
+# 
+# def hsv_to_rgb(hsv):
+#         h = float(hsv[0])
+#         s = float(hsv[1])
+#         v = float(hsv[2])
+# 
+#         if( s == 0 ) :
+#                 #achromatic (grey)
+#                 r = g = b = v
+# 
+#         else:
+#                 # sector 0 to 5
+#                 h = h/60.
+#                 i = int(h)
+#                 f = h - i                       # factorial part of h
+#                 #print h,i,f
+#                 p = v * ( 1 - s )
+#                 q = v * ( 1 - s * f )
+#                 t = v * ( 1 - s * ( 1 - f ) )
+# 
+#                 if i == 0:
+#                         (r,g,b) = (v,t,p)
+#                 elif i == 1:
+#                         (r,g,b) = (q,v,p)
+#                 elif i == 2:
+#                         (r,g,b) = (p,v,t)
+#                 elif i == 3:
+#                         (r,g,b) = (p,q,v)
+#                 elif i == 4:
+#                         (r,g,b) = (t,p,v)
+#                 elif i == 5:
+#                         (r,g,b) = (v,p,q)
+#                 else:
+#                         (r,g,b) = (v,v,v)
+#                         print "error, i not equal 1-5"
+# 
+#         return [r,g,b]
