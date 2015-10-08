@@ -4,7 +4,13 @@ Fixing TIM
 BioVis Contest 2013
 
 3-D renderer switch to Pymol from PyMOL.
- 
+
+Demo
+---------
+ * [IEEE BioVis 2013 Main Tool Example](https://vimeo.com/97869977)
+ * [IEEE BioVis 2013 3D Motion Example](https://vimeo.com/97869975)
+ * [IEEE BioVis 2013 Interactive Trend Image Example](https://vimeo.com/97869976)
+
 Dependence
 ---------
 * Pymol 1.6
